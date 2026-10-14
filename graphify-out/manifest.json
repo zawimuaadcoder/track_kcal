@@ -1,0 +1,182 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1791974124.155854,
+    "seen": 1791974228.2911615,
+    "ast_hash": "be435099bdeda9ccd55f3a845f944686",
+    "semantic_hash": ""
+  },
+  "app.json": {
+    "mtime": 1791973902.4820108,
+    "seen": 1791974228.2911692,
+    "ast_hash": "ee7301d8c5c5ae4e994e00fc350be949",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1791973983.481688,
+    "seen": 1791974228.2911725,
+    "ast_hash": "e5d962c7e2dc864d10b729d56a092fbf",
+    "semantic_hash": ""
+  },
+  "src/app/(tabs)/_layout.tsx": {
+    "mtime": 1791974187.4813185,
+    "seen": 1791974228.2911742,
+    "ast_hash": "2cb99857b1c46afaeb7ac1e987fa64ad",
+    "semantic_hash": ""
+  },
+  "src/app/(tabs)/ajustes.tsx": {
+    "mtime": 1791974178.7340271,
+    "seen": 1791974228.2911756,
+    "ast_hash": "861ca8d519fa4259af7ece21e9e0718b",
+    "semantic_hash": ""
+  },
+  "src/app/(tabs)/ayuno.tsx": {
+    "mtime": 1791974145.3340251,
+    "seen": 1791974228.2911773,
+    "ast_hash": "bdad69f80d59e9b11aaf487026330e22",
+    "semantic_hash": ""
+  },
+  "src/app/(tabs)/index.tsx": {
+    "mtime": 1791974045.0740192,
+    "seen": 1791974228.291179,
+    "ast_hash": "e3369daf2a92109ffacf697754c04403",
+    "semantic_hash": ""
+  },
+  "src/app/(tabs)/progreso.tsx": {
+    "mtime": 1791974167.5140266,
+    "seen": 1791974228.2911804,
+    "ast_hash": "76cf92c18cfa16371a141154bb49230d",
+    "semantic_hash": ""
+  },
+  "src/app/_layout.tsx": {
+    "mtime": 1791974005.2940168,
+    "seen": 1791974228.2911818,
+    "ast_hash": "1f5877e349dca38220d7e8f99acaa6f8",
+    "semantic_hash": ""
+  },
+  "src/app/add-food.tsx": {
+    "mtime": 1791974065.8260205,
+    "seen": 1791974228.2911835,
+    "ast_hash": "cd952f4f118b0a68346554232047c63e",
+    "semantic_hash": ""
+  },
+  "src/app/food.tsx": {
+    "mtime": 1791974105.5540228,
+    "seen": 1791974228.2911847,
+    "ast_hash": "633e5b0c373b85fe76ca81546faa7df2",
+    "semantic_hash": ""
+  },
+  "src/app/onboarding.tsx": {
+    "mtime": 1791974017.7300177,
+    "seen": 1791974228.291186,
+    "ast_hash": "7b89f74e2b2452cc0eaf4bd2b714ba5d",
+    "semantic_hash": ""
+  },
+  "src/app/scan.tsx": {
+    "mtime": 1791974077.6060212,
+    "seen": 1791974228.2911873,
+    "ast_hash": "e889aff305a96f4588643205bdea2ae7",
+    "semantic_hash": ""
+  },
+  "src/components/WeightChart.tsx": {
+    "mtime": 1791974154.3300257,
+    "seen": 1791974228.2911887,
+    "ast_hash": "3e2c74df8b6ea20533300593e8a8827a",
+    "semantic_hash": ""
+  },
+  "src/components/ui.tsx": {
+    "mtime": 1791974000.9100165,
+    "seen": 1791974228.2911897,
+    "ast_hash": "bd4f06b984af34d959c17756f116d3c3",
+    "semantic_hash": ""
+  },
+  "src/lib/nutrition.ts": {
+    "mtime": 1791973916.3508153,
+    "seen": 1791974228.291191,
+    "ast_hash": "39011111f3b10d780289eb4b128741ff",
+    "semantic_hash": ""
+  },
+  "src/lib/openFoodFacts.ts": {
+    "mtime": 1791973925.1020122,
+    "seen": 1791974228.2911923,
+    "ast_hash": "2084df8f0334304da209fafac2c5d924",
+    "semantic_hash": ""
+  },
+  "src/lib/store.tsx": {
+    "mtime": 1791973942.178013,
+    "seen": 1791974228.2911935,
+    "ast_hash": "9fa9f5c3b9655930e1ec9ead5e781d9a",
+    "semantic_hash": ""
+  },
+  "src/lib/theme.ts": {
+    "mtime": 1791973944.9780133,
+    "seen": 1791974228.2911954,
+    "ast_hash": "b29b785b5c3b4bbd1626d45801b3bb04",
+    "semantic_hash": ""
+  },
+  "src/lib/types.ts": {
+    "mtime": 1791973908.6060112,
+    "seen": 1791974228.2911966,
+    "ast_hash": "61e2c41b0be583f42142b397cfc6c607",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1791973802.4074323,
+    "seen": 1791974228.2911985,
+    "ast_hash": "a5df9ddad82c56de332cbb7d00dd294b",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1791973802.4415932,
+    "seen": 1791974228.2911994,
+    "ast_hash": "233d1484702a528f5dcb4333cd01bb43",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1791974124.1547644,
+    "seen": 1791974228.291201,
+    "ast_hash": "67d88e9d0760c3ba54c75dfd9551c1c5",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1791974227.627674,
+    "seen": 1791974228.2912023,
+    "ast_hash": "02822aa8ffeebb193d7c6616ebe635ff",
+    "semantic_hash": ""
+  },
+  "assets/android-icon-background.png": {
+    "mtime": 1791973802.4084246,
+    "seen": 1791974228.2912035,
+    "ast_hash": "2d65569cc0e2afdcea0af9f9902d4173",
+    "semantic_hash": ""
+  },
+  "assets/android-icon-foreground.png": {
+    "mtime": 1791973802.411189,
+    "seen": 1791974228.2912052,
+    "ast_hash": "72e71a9c846c6aa4ae32476641a00e18",
+    "semantic_hash": ""
+  },
+  "assets/android-icon-monochrome.png": {
+    "mtime": 1791973802.4133034,
+    "seen": 1791974228.2912064,
+    "ast_hash": "1e097dab989759fc0b69440092ca22cd",
+    "semantic_hash": ""
+  },
+  "assets/favicon.png": {
+    "mtime": 1791973802.414034,
+    "seen": 1791974228.2912078,
+    "ast_hash": "d9f444efbdfbe7931aa93beada07318a",
+    "semantic_hash": ""
+  },
+  "assets/icon.png": {
+    "mtime": 1791973802.4180048,
+    "seen": 1791974228.291209,
+    "ast_hash": "cb975bba2216ce10a60e6c0ffe9941a2",
+    "semantic_hash": ""
+  },
+  "assets/splash-icon.png": {
+    "mtime": 1791973802.4230814,
+    "seen": 1791974228.2912104,
+    "ast_hash": "97dae5a0e62ad8551d8a31897b425e63",
+    "semantic_hash": ""
+  }
+}
