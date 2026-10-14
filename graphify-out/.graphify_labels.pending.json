@@ -2,16 +2,14 @@
   "0": "add-food.tsx",
   "1": "package.json",
   "2": "expo",
-  "3": "store.tsx",
+  "3": "useStore",
   "4": "useThemed",
   "5": "dependencies",
   "6": "index.tsx",
-  "7": "theme.ts",
   "8": "AGENTS.md",
   "9": "MyFitPalace",
   "10": "tsconfig.json",
   "11": "CLAUDE.md",
-  "12": "FloatingTabBar.tsx",
-  "13": "scripts",
+  "12": "theme.ts",
   "14": "build-ipa.sh"
 }

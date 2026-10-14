@@ -3,10 +3,10 @@ import * as Haptics from 'expo-haptics';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StreakInfo } from '../lib/streak';
+import { Mascot } from './Mascot';
 import { fonts, Palette, useThemed } from '../lib/theme';
 
 const FLAME = '#FF7A1A';
-const FLAME_CORE = '#FFC23D';
 const NUMBER_HEIGHT = 92;
 
 /**
@@ -53,9 +53,12 @@ export function StreakCelebration({
     glowLoop.start();
 
     // Vibración justo cuando sube el número
-    const t = setTimeout(() => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-    }, 220 + 450 + 7 * 70 + 200);
+    const t = setTimeout(
+      () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      },
+      220 + 450 + 7 * 70 + 200,
+    );
 
     return () => {
       clearTimeout(t);
@@ -82,8 +85,7 @@ export function StreakCelebration({
               pointerEvents="none"
             />
             <Animated.View style={{ transform: [{ scale: flameScale }, { rotate: flameRotate }] }}>
-              <Ionicons name="flame" size={120} color={FLAME} />
-              <Ionicons name="flame" size={64} color={FLAME_CORE} style={styles.flameCore} />
+              <Mascot size={130} />
             </Animated.View>
           </View>
 
@@ -92,11 +94,7 @@ export function StreakCelebration({
               <Animated.Text style={[styles.number, { transform: [{ translateY: oldY }] }]}>{previous}</Animated.Text>
             )}
             <Animated.Text
-              style={[
-                styles.number,
-                { transform: [{ translateY: newY }] },
-                previous === 0 && { opacity: roll },
-              ]}
+              style={[styles.number, { transform: [{ translateY: newY }] }, previous === 0 && { opacity: roll }]}
             >
               {streak.count}
             </Animated.Text>
@@ -159,7 +157,6 @@ const makeStyles = (colors: Palette) =>
     },
     flameWrap: { width: 160, height: 150, alignItems: 'center', justifyContent: 'center' },
     glow: { position: 'absolute', width: 130, height: 130, borderRadius: 65, backgroundColor: FLAME },
-    flameCore: { position: 'absolute', bottom: 10, alignSelf: 'center' },
     numberWindow: { height: NUMBER_HEIGHT, overflow: 'hidden', alignSelf: 'stretch', alignItems: 'center' },
     number: {
       position: 'absolute',

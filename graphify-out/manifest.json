@@ -6,15 +6,15 @@
     "semantic_hash": ""
   },
   "app.json": {
-    "mtime": 1791981139.3507578,
-    "seen": 1791981490.402374,
-    "ast_hash": "f1445b99e2b74de3d44cbd1b6f930966",
+    "mtime": 1791981987.6188083,
+    "seen": 1791982039.266182,
+    "ast_hash": "c4fd9e7476b62da2d49cce68f7077846",
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1791981345.01477,
-    "seen": 1791981490.402378,
-    "ast_hash": "c04a7e61c87851cca07f0856a9b3b18f",
+    "mtime": 1791981992.0828085,
+    "seen": 1791982039.266186,
+    "ast_hash": "34167ea3e1a32da2302f70c99880e8d2",
     "semantic_hash": ""
   },
   "src/app/(tabs)/_layout.tsx": {
@@ -144,39 +144,39 @@
     "semantic_hash": ""
   },
   "assets/android-icon-background.png": {
-    "mtime": 1791973802.4084246,
-    "seen": 1791974228.2912035,
-    "ast_hash": "2d65569cc0e2afdcea0af9f9902d4173",
+    "mtime": 1791981987.5803812,
+    "seen": 1791982039.2662468,
+    "ast_hash": "e52097585abc988519535d34336059db",
     "semantic_hash": ""
   },
   "assets/android-icon-foreground.png": {
-    "mtime": 1791973802.411189,
-    "seen": 1791974228.2912052,
-    "ast_hash": "72e71a9c846c6aa4ae32476641a00e18",
+    "mtime": 1791981987.5831707,
+    "seen": 1791982039.2662482,
+    "ast_hash": "dd9357161242277737483929770c1c75",
     "semantic_hash": ""
   },
   "assets/android-icon-monochrome.png": {
-    "mtime": 1791973802.4133034,
-    "seen": 1791974228.2912064,
-    "ast_hash": "1e097dab989759fc0b69440092ca22cd",
+    "mtime": 1791981987.5861669,
+    "seen": 1791982039.2662494,
+    "ast_hash": "009c3c92716bf99beb8e65eb78839c41",
     "semantic_hash": ""
   },
   "assets/favicon.png": {
-    "mtime": 1791973802.414034,
-    "seen": 1791974228.2912078,
-    "ast_hash": "d9f444efbdfbe7931aa93beada07318a",
+    "mtime": 1791981987.5910687,
+    "seen": 1791982039.266251,
+    "ast_hash": "7d4a98717e5cabd3809bd6166cd37578",
     "semantic_hash": ""
   },
   "assets/icon.png": {
-    "mtime": 1791973802.4180048,
-    "seen": 1791974228.291209,
-    "ast_hash": "cb975bba2216ce10a60e6c0ffe9941a2",
+    "mtime": 1791981987.5745118,
+    "seen": 1791982039.2662523,
+    "ast_hash": "9dd0fc9ce8f2baa2a50bb8bbd7afe50a",
     "semantic_hash": ""
   },
   "assets/splash-icon.png": {
-    "mtime": 1791973802.4230814,
-    "seen": 1791974228.2912104,
-    "ast_hash": "97dae5a0e62ad8551d8a31897b425e63",
+    "mtime": 1791981987.577463,
+    "seen": 1791982039.2662537,
+    "ast_hash": "098407b76e90e358a964e5def03d5f53",
     "semantic_hash": ""
   },
   "scripts/build-ipa.sh": {
@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/components/StreakCelebration.tsx": {
-    "mtime": 1791981384.2027724,
-    "seen": 1791981490.4023964,
-    "ast_hash": "2d444f737fe28b8c4778784e47af1d10",
+    "mtime": 1791982012.3748097,
+    "seen": 1791982039.266224,
+    "ast_hash": "d65ce68b6084dedb1501c6e6d87b553b",
     "semantic_hash": ""
   },
   "src/lib/genericFoods.ts": {
@@ -219,6 +219,12 @@
     "mtime": 1791981350.6387703,
     "seen": 1791981490.4024074,
     "ast_hash": "122ac6989f6a800adb7d8451e98e0d51",
+    "semantic_hash": ""
+  },
+  "src/components/Mascot.tsx": {
+    "mtime": 1791982006.7308095,
+    "seen": 1791982039.2662203,
+    "ast_hash": "6c14055a669a975edf5618d8557a0788",
     "semantic_hash": ""
   }
 }
