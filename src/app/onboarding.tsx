@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, NumberInput, parseNumber } from '../components/ui';
 import { calorieGoalFor } from '../lib/nutrition';
 import { useStore } from '../lib/store';
-import { Palette, useThemed } from '../lib/theme';
+import { fonts, Palette, useThemed } from '../lib/theme';
 
 export default function Onboarding() {
   const { styles } = useThemed(makeStyles);
@@ -45,8 +45,8 @@ const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.bg },
     container: { flex: 1, padding: 24, justifyContent: 'space-between' },
-    title: { fontSize: 34, fontWeight: '800', color: colors.text, marginTop: 24 },
-    subtitle: { fontSize: 17, color: colors.muted, marginTop: 6, marginBottom: 32 },
-    label: { fontSize: 15, fontWeight: '600', color: colors.text, marginTop: 20, marginBottom: 8 },
-    hint: { marginTop: 24, fontSize: 15, color: colors.muted, lineHeight: 21 },
+    title: { fontSize: 34, fontFamily: fonts.extrabold, color: colors.text, marginTop: 24 },
+    subtitle: { fontFamily: fonts.regular, fontSize: 17, color: colors.muted, marginTop: 6, marginBottom: 32 },
+    label: { fontSize: 15, fontFamily: fonts.semibold, color: colors.text, marginTop: 20, marginBottom: 8 },
+    hint: { marginTop: 24, fontFamily: fonts.regular, fontSize: 15, color: colors.muted, lineHeight: 21 },
   });

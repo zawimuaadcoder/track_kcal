@@ -58,15 +58,16 @@ export function shiftDate(key: string, days: number): string {
   return dateKey(new Date(y, m - 1, d + days));
 }
 
+/** "Hoy, mar 14 oct" · "Ayer, lun 13 oct" · "jue 9 oct" */
 export function formatDateLabel(key: string): string {
   const today = dateKey();
-  if (key === today) return 'Hoy';
-  if (key === shiftDate(today, -1)) return 'Ayer';
-  if (key === shiftDate(today, 1)) return 'Mañana';
   const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
+  const date = new Date(y, m - 1, d);
+  const weekday = date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '');
+  const month = date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+  const label = `${weekday} ${d} ${month}`;
+  if (key === today) return `Hoy, ${label}`;
+  if (key === shiftDate(today, -1)) return `Ayer, ${label}`;
+  if (key === shiftDate(today, 1)) return `Mañana, ${label}`;
+  return label;
 }

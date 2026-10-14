@@ -67,4 +67,6 @@ export type AppData = {
   weights: WeightEntry[];
   fasting: Fasting;
   recentFoods: Food[];
+  /** Último día en que se mostró la animación de racha */
+  streakCelebratedOn?: string;
 };

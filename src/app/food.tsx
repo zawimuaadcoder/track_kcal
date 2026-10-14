@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Button, Card, NumberInput, NutriScore, parseNumber } from '../components/ui';
 import { useStore } from '../lib/store';
-import { Palette, useThemed } from '../lib/theme';
+import { fonts, Palette, useThemed } from '../lib/theme';
 import { Food, MEALS, MealType } from '../lib/types';
 
 /**
@@ -187,7 +187,7 @@ function Field({
   return (
     <View style={{ width: '48%' }}>
       <Text style={styles.smallLabel}>{label}</Text>
-      <NumberInput value={value} onChangeText={onChange} suffix={suffix} style={{ fontSize: 17 }} placeholder="0" />
+      <NumberInput value={value} onChangeText={onChange} suffix={suffix} style={{ fontFamily: fonts.regular, fontSize: 17 }} placeholder="0" />
     </View>
   );
 }
@@ -207,15 +207,15 @@ function Nutr({ label, value, color, unit = '' }: { label: string; value: number
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
-    container: { padding: 16, paddingBottom: 40 },
+    container: { padding: 16, paddingBottom: 40, gap: 12 },
     header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     image: { width: 64, height: 64, borderRadius: 10, backgroundColor: colors.bg },
-    title: { fontSize: 18, fontWeight: '700', color: colors.text },
-    muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
-    label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 8, marginTop: 4 },
-    smallLabel: { fontSize: 13, color: colors.muted, marginBottom: 4, marginTop: 8 },
+    title: { fontSize: 18, fontFamily: fonts.bold, color: colors.text },
+    muted: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 2 },
+    label: { fontSize: 15, fontFamily: fonts.semibold, color: colors.text, marginBottom: 8, marginTop: 4 },
+    smallLabel: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginBottom: 4, marginTop: 8 },
     textInput: {
-      fontSize: 17,
+      fontFamily: fonts.regular, fontSize: 17,
       paddingVertical: 12,
       paddingHorizontal: 14,
       borderWidth: 1,
@@ -228,7 +228,7 @@ const makeStyles = (colors: Palette) =>
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10, marginBottom: 8 },
     chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: colors.bg },
     chipActive: { backgroundColor: colors.primary },
-    chipText: { fontSize: 14, color: colors.text, fontWeight: '500' },
+    chipText: { fontSize: 14, color: colors.text, fontFamily: fonts.medium },
     nutrRow: { flexDirection: 'row' },
-    nutrValue: { fontSize: 20, fontWeight: '700' },
+    nutrValue: { fontSize: 20, fontFamily: fonts.bold },
   });

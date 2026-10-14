@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NutriScore } from '../components/ui';
 import { searchFoods } from '../lib/openFoodFacts';
+import { rankFoods, searchGeneric } from '../lib/search';
 import { useStore } from '../lib/store';
-import { Palette, useThemed } from '../lib/theme';
+import { fonts, Palette, useThemed } from '../lib/theme';
 import { Food } from '../lib/types';
 
 export default function AddFood() {
@@ -29,8 +30,8 @@ export default function AddFood() {
       setLoading(true);
       setError(null);
       searchFoods(q, ctrl.signal)
-        .then(setResults)
-        .catch((e) => {
+        .then((foods) => setResults(rankFoods(q, foods)))
+        .catch(() => {
           if (!ctrl.signal.aborted) setError('No se pudo buscar. Revisa tu conexión.');
         })
         .finally(() => !ctrl.signal.aborted && setLoading(false));
@@ -43,7 +44,11 @@ export default function AddFood() {
 
   const open = (food: Food) => router.push({ pathname: '/food', params: { date, meal, food: JSON.stringify(food) } });
 
-  const list = results ?? data.recentFoods;
+  // Los alimentos básicos salen al instante y primero; luego los productos de Open Food Facts.
+  const trimmed = query.trim();
+  const generic = useMemo(() => (trimmed.length >= 2 ? searchGeneric(trimmed) : []), [trimmed]);
+  const searching = trimmed.length >= 2;
+  const list = searching ? [...generic, ...(results ?? [])] : data.recentFoods;
 
   return (
     <View style={styles.container}>
@@ -75,18 +80,23 @@ export default function AddFood() {
         <Text style={styles.customText}>Crear alimento manualmente</Text>
       </Pressable>
 
-      {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
-      {error && <Text style={styles.empty}>{error}</Text>}
 
       <FlatList
         data={list}
         keyExtractor={(f, i) => `${f.code ?? f.name}-${i}`}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={!results && list.length > 0 ? <Text style={styles.section}>Recientes</Text> : null}
+        ListHeaderComponent={!searching && list.length > 0 ? <Text style={styles.section}>Recientes</Text> : null}
+        ListFooterComponent={
+          searching && loading ? (
+            <ActivityIndicator style={{ marginVertical: 20 }} color={colors.primary} />
+          ) : searching && error ? (
+            <Text style={styles.empty}>{error}</Text>
+          ) : null
+        }
         ListEmptyComponent={
           !loading && !error ? (
             <Text style={styles.empty}>
-              {results
+              {searching
                 ? 'Sin resultados. Prueba otro nombre o escanea el código.'
                 : 'Busca un alimento o escanea su código de barras.'}
             </Text>
@@ -98,7 +108,11 @@ export default function AddFood() {
               <Image source={{ uri: item.imageUrl }} style={styles.thumb} />
             ) : (
               <View style={[styles.thumb, styles.thumbEmpty]}>
-                <Ionicons name="nutrition-outline" size={20} color={colors.muted} />
+                <Ionicons
+                  name={item.code?.startsWith('generic:') ? 'leaf-outline' : 'nutrition-outline'}
+                  size={20}
+                  color={item.code?.startsWith('generic:') ? colors.primary : colors.muted}
+                />
               </View>
             )}
             <View style={{ flex: 1 }}>
@@ -106,7 +120,8 @@ export default function AddFood() {
                 {item.name}
               </Text>
               <Text style={styles.muted} numberOfLines={1}>
-                {item.per100g.kcal} kcal / 100 g{item.brand ? ` · ${item.brand}` : ''}
+                {item.per100g.kcal} kcal / 100 g
+                {item.brand ? ` · ${item.brand}` : item.code?.startsWith('generic:') ? ' · Básico' : ''}
               </Text>
             </View>
             <NutriScore grade={item.nutriscore} />
@@ -132,7 +147,7 @@ const makeStyles = (colors: Palette) =>
       borderWidth: 1,
       borderColor: colors.border,
     },
-    searchInput: { flex: 1, fontSize: 16, paddingVertical: 12, color: colors.text },
+    searchInput: { flex: 1, fontFamily: fonts.regular, fontSize: 16, paddingVertical: 12, color: colors.text },
     scanBtn: {
       width: 48,
       borderRadius: 12,
@@ -141,10 +156,10 @@ const makeStyles = (colors: Palette) =>
       justifyContent: 'center',
     },
     customRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8 },
-    customText: { color: colors.primary, fontSize: 15, fontWeight: '500' },
+    customText: { color: colors.primary, fontSize: 15, fontFamily: fonts.medium },
     section: {
       fontSize: 13,
-      fontWeight: '700',
+      fontFamily: fonts.bold,
       color: colors.muted,
       paddingHorizontal: 16,
       paddingVertical: 8,
@@ -162,7 +177,7 @@ const makeStyles = (colors: Palette) =>
     },
     thumb: { width: 44, height: 44, borderRadius: 8, backgroundColor: colors.bg },
     thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
-    name: { fontSize: 15, fontWeight: '500', color: colors.text },
-    muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
+    name: { fontSize: 15, fontFamily: fonts.medium, color: colors.text },
+    muted: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 2 },
     empty: { textAlign: 'center', color: colors.muted, marginTop: 30, paddingHorizontal: 32, lineHeight: 20 },
   });

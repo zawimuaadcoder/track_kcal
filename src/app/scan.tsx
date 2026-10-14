@@ -6,7 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/ui';
 import { getProductByBarcode } from '../lib/openFoodFacts';
-import { Palette, useThemed } from '../lib/theme';
+import { fonts, Palette, useThemed } from '../lib/theme';
 
 export default function Scan() {
   const { colors, styles } = useThemed(makeStyles);
@@ -90,12 +90,12 @@ const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     container: { flex: 1, justifyContent: 'center' },
     black: { flex: 1, backgroundColor: '#000' },
-    permText: { fontSize: 17, textAlign: 'center', marginBottom: 24, color: colors.text },
+    permText: { fontFamily: fonts.regular, fontSize: 17, textAlign: 'center', marginBottom: 24, color: colors.text },
     overlay: { flex: 1, justifyContent: 'space-between', alignItems: 'center' },
     close: { alignSelf: 'flex-start', margin: 16 },
     frame: { width: 280, height: 170, borderWidth: 3, borderColor: '#fff', borderRadius: 16 },
     bottom: { minHeight: 160, width: '100%', alignItems: 'center', justifyContent: 'center', padding: 16 },
-    hint: { color: '#fff', fontSize: 16, fontWeight: '500' },
+    hint: { color: '#fff', fontSize: 16, fontFamily: fonts.medium },
     panel: { backgroundColor: colors.card, borderRadius: 16, padding: 16, width: '100%' },
-    panelText: { fontSize: 15, color: colors.text, textAlign: 'center', marginBottom: 12 },
+    panelText: { fontFamily: fonts.regular, fontSize: 15, color: colors.text, textAlign: 'center', marginBottom: 12 },
   });

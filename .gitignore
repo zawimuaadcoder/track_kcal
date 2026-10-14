@@ -42,3 +42,7 @@ yarn-error.*
 
 # graphify per-session hook state
 graphify-out/cache/hook_sessions/
+
+# Build local de iOS
+/ios
+MyFitPalace.ipa

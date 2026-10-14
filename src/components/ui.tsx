@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { Palette, radius, spacing, useThemed } from '../lib/theme';
+import { fonts, Palette, radius, spacing, useThemed } from '../lib/theme';
 
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
   const { styles } = useThemed(makeStyles);
@@ -23,7 +23,7 @@ export function Button({
 }) {
   const { colors, styles } = useThemed(makeStyles);
   const bg = variant === 'primary' ? colors.primary : variant === 'danger' ? colors.danger : colors.card;
-  const fg = variant === 'secondary' ? colors.primary : '#fff';
+  const fg = variant === 'secondary' ? colors.primary : colors.onPrimary;
   return (
     <Pressable
       onPress={onPress}
@@ -130,15 +130,14 @@ const makeStyles = (colors: Palette) =>
       backgroundColor: colors.card,
       borderRadius: radius,
       padding: spacing,
-      marginBottom: 12,
     },
     button: {
-      paddingVertical: 14,
+      paddingVertical: 16,
       paddingHorizontal: 20,
-      borderRadius: 12,
+      borderRadius: 16,
       alignItems: 'center',
     },
-    buttonText: { fontSize: 16, fontWeight: '600' },
+    buttonText: { fontSize: 16, fontFamily: fonts.semibold },
     inputWrap: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -148,10 +147,10 @@ const makeStyles = (colors: Palette) =>
       borderRadius: 12,
       paddingHorizontal: 14,
     },
-    input: { flex: 1, fontSize: 20, paddingVertical: 12, color: colors.text },
-    suffix: { fontSize: 16, color: colors.muted, marginLeft: 6 },
+    input: { flex: 1, fontFamily: fonts.regular, fontSize: 20, paddingVertical: 12, color: colors.text },
+    suffix: { fontFamily: fonts.regular, fontSize: 16, color: colors.muted, marginLeft: 6 },
     barTrack: { height: 6, borderRadius: 3, backgroundColor: colors.border, overflow: 'hidden' },
     barFill: { height: 6, borderRadius: 3 },
     nutri: { width: 22, height: 22, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
-    nutriText: { color: '#fff', fontWeight: '800', fontSize: 12 },
+    nutriText: { color: '#fff', fontFamily: fonts.extrabold, fontSize: 12 },
   });

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Screen } from '../../components/Screen';
 import { Button, Card, NumberInput, parseNumber } from '../../components/ui';
 import { calorieGoalFor, macroGoals } from '../../lib/nutrition';
 import { useStore } from '../../lib/store';
-import { ACCENT_OPTIONS, MODE_OPTIONS, Palette, PALETTES, useThemed } from '../../lib/theme';
+import { ACCENT_OPTIONS, fonts, MODE_OPTIONS, Palette, PALETTES, useThemed } from '../../lib/theme';
 
 export default function Settings() {
   const { colors, styles } = useThemed(makeStyles);
@@ -26,7 +27,7 @@ export default function Settings() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <Screen title="Ajustes">
       <Text style={styles.section}>Apariencia</Text>
       <Card>
         <Text style={[styles.label, { marginTop: 0 }]}>Color</Text>
@@ -108,18 +109,18 @@ export default function Settings() {
           }
         />
       </View>
-    </ScrollView>
+    </Screen>
   );
 }
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     container: { padding: 16, paddingBottom: 40 },
-    label: { fontSize: 15, fontWeight: '600', color: colors.text, marginTop: 16, marginBottom: 8 },
-    muted: { fontSize: 13, color: colors.muted, marginTop: 10, lineHeight: 18 },
+    label: { fontSize: 15, fontFamily: fonts.semibold, color: colors.text, marginTop: 16, marginBottom: 8 },
+    muted: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 10, lineHeight: 18 },
     section: {
       fontSize: 13,
-      fontWeight: '700',
+      fontFamily: fonts.bold,
       color: colors.muted,
       textTransform: 'uppercase',
       letterSpacing: 0.6,
@@ -139,8 +140,8 @@ const makeStyles = (colors: Palette) =>
       borderColor: colors.border,
     },
     swatch: { width: 22, height: 22, borderRadius: 11 },
-    optionText: { fontSize: 16, fontWeight: '600', color: colors.text },
+    optionText: { fontSize: 16, fontFamily: fonts.semibold, color: colors.text },
     segment: { flexDirection: 'row', backgroundColor: colors.bg, borderRadius: 12, padding: 4 },
     segmentItem: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: 'center' },
-    segmentText: { fontSize: 15, fontWeight: '600', color: colors.muted },
+    segmentText: { fontSize: 15, fontFamily: fonts.semibold, color: colors.muted },
   });

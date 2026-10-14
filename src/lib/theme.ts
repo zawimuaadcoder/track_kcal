@@ -102,8 +102,8 @@ export const MODE_OPTIONS: { key: ThemeMode; label: string }[] = [
   { key: 'dark', label: 'Oscuro' },
 ];
 
-export const radius = 22;
-export const spacing = 16;
+export const radius = 26;
+export const spacing = 18;
 
 export const ThemeContext = createContext<Palette>(PALETTES.violeta.light);
 
@@ -117,3 +117,12 @@ export function useThemed<T>(makeStyles: (c: Palette) => T): { colors: Palette; 
   const styles = useMemo(() => makeStyles(colors), [colors, makeStyles]);
   return { colors, styles };
 }
+
+/** Familias de Figtree por grosor; se cargan en src/app/_layout.tsx. */
+export const fonts = {
+  regular: 'Figtree_400Regular',
+  medium: 'Figtree_500Medium',
+  semibold: 'Figtree_600SemiBold',
+  bold: 'Figtree_700Bold',
+  extrabold: 'Figtree_800ExtraBold',
+} as const;

@@ -1,13 +1,28 @@
+import {
+  Figtree_400Regular,
+  Figtree_500Medium,
+  Figtree_600SemiBold,
+  Figtree_700Bold,
+  Figtree_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/figtree';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { StoreProvider, useStore } from '../lib/store';
-import { PALETTES, ThemeContext, useColors } from '../lib/theme';
+import { fonts, PALETTES, ThemeContext, useColors } from '../lib/theme';
 
 function RootStack() {
   const { loaded, data } = useStore();
   const colors = useColors();
-  if (!loaded) {
+  const [fontsLoaded, fontError] = useFonts({
+    Figtree_400Regular,
+    Figtree_500Medium,
+    Figtree_600SemiBold,
+    Figtree_700Bold,
+    Figtree_800ExtraBold,
+  });
+  if (!loaded || (!fontsLoaded && !fontError)) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }}>
         <ActivityIndicator color={colors.primary} />
@@ -20,7 +35,7 @@ function RootStack() {
       screenOptions={{
         contentStyle: { backgroundColor: colors.bg },
         headerStyle: { backgroundColor: colors.bg },
-        headerTitleStyle: { color: colors.text },
+        headerTitleStyle: { color: colors.text, fontFamily: fonts.bold },
         headerTintColor: colors.primary,
         headerShadowVisible: false,
       }}

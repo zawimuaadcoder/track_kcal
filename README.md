@@ -20,7 +20,7 @@ App personal de seguimiento de calorías para iPhone (Expo / React Native).
    ```
 3. Escanea el QR con la cámara del iPhone → se abre en Expo Go.
 
-Para tenerla instalada como app normal (y compartirla con amigos por TestFlight) hace falta una cuenta de Apple Developer y `npx eas-cli@latest build -p ios`.
+Para instalarla como app normal con **Sideloadly** (Mac con Xcode y CocoaPods): `./scripts/build-ipa.sh` genera `MyFitPalace.ipa`; ábrelo con Sideloadly, conecta el iPhone e inicia sesión con tu Apple ID. Con un Apple ID gratuito hay que reinstalarla cada 7 días.
 
 ## Desarrollo
 ```bash

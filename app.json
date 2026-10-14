@@ -29,7 +29,8 @@
         {
           "cameraPermission": "MyFitPalace usa la cámara para escanear códigos de barras de alimentos."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "scheme": "myfitpalace"
   }
