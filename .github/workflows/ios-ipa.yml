@@ -1,0 +1,44 @@
+name: Build iOS IPA
+
+# Compila MyFitPalace.ipa sin firmar (para Sideloadly) y lo publica como release.
+on:
+  push:
+    branches: [claude/nifty-ramanujan-qh2z95, main]
+    paths-ignore: ['graphify-out/**', '**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build IPA
+        run: ./scripts/build-ipa.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MyFitPalace-ipa
+          path: MyFitPalace.ipa
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ipa-${{ github.run_number }}
+          name: MyFitPalace build ${{ github.run_number }}
+          body: IPA sin firmar para instalar con Sideloadly.
+          files: MyFitPalace.ipa
+          make_latest: true

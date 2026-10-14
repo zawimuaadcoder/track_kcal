@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "› Instalando dependencias…"
-npm install
+npm ci
 
 echo "› Generando el proyecto nativo de iOS…"
 npx expo prebuild --platform ios --clean
