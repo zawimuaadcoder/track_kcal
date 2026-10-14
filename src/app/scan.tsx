@@ -6,9 +6,10 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/ui';
 import { getProductByBarcode } from '../lib/openFoodFacts';
-import { colors } from '../lib/theme';
+import { Palette, useThemed } from '../lib/theme';
 
 export default function Scan() {
+  const { colors, styles } = useThemed(makeStyles);
   const { date, meal } = useLocalSearchParams<{ date: string; meal: string }>();
   const [permission, requestPermission] = useCameraPermissions();
   const [status, setStatus] = useState<'scanning' | 'loading' | 'notfound' | 'error'>('scanning');
@@ -85,15 +86,16 @@ export default function Scan() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center' },
-  black: { flex: 1, backgroundColor: '#000' },
-  permText: { fontSize: 17, textAlign: 'center', marginBottom: 24, color: colors.text },
-  overlay: { flex: 1, justifyContent: 'space-between', alignItems: 'center' },
-  close: { alignSelf: 'flex-start', margin: 16 },
-  frame: { width: 280, height: 170, borderWidth: 3, borderColor: '#fff', borderRadius: 16 },
-  bottom: { minHeight: 160, width: '100%', alignItems: 'center', justifyContent: 'center', padding: 16 },
-  hint: { color: '#fff', fontSize: 16, fontWeight: '500' },
-  panel: { backgroundColor: colors.card, borderRadius: 16, padding: 16, width: '100%' },
-  panelText: { fontSize: 15, color: colors.text, textAlign: 'center', marginBottom: 12 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center' },
+    black: { flex: 1, backgroundColor: '#000' },
+    permText: { fontSize: 17, textAlign: 'center', marginBottom: 24, color: colors.text },
+    overlay: { flex: 1, justifyContent: 'space-between', alignItems: 'center' },
+    close: { alignSelf: 'flex-start', margin: 16 },
+    frame: { width: 280, height: 170, borderWidth: 3, borderColor: '#fff', borderRadius: 16 },
+    bottom: { minHeight: 160, width: '100%', alignItems: 'center', justifyContent: 'center', padding: 16 },
+    hint: { color: '#fff', fontSize: 16, fontWeight: '500' },
+    panel: { backgroundColor: colors.card, borderRadius: 16, padding: 16, width: '100%' },
+    panelText: { fontSize: 15, color: colors.text, textAlign: 'center', marginBottom: 12 },
+  });

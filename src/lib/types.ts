@@ -55,7 +55,13 @@ export type Fasting = {
   history: { start: number; end: number }[];
 };
 
+export type Appearance = {
+  accent: 'violeta' | 'coral';
+  mode: 'system' | 'light' | 'dark';
+};
+
 export type AppData = {
+  appearance: Appearance;
   profile: Profile | null;
   days: Record<string, DayLog>;
   weights: WeightEntry[];

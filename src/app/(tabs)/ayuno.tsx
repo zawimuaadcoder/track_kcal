@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Ring } from '../../components/ui';
 import { useStore } from '../../lib/store';
-import { colors } from '../../lib/theme';
+import { Palette, useThemed } from '../../lib/theme';
 
 const PLANS = [
   { hours: 12, label: '12:12' },
@@ -25,6 +25,7 @@ function formatTime(ts: number) {
 }
 
 export default function Fasting() {
+  const { colors, styles } = useThemed(makeStyles);
   const { data, startFast, endFast, setFastTarget } = useStore();
   const { startedAt, targetHours, history } = data.fasting;
   const [now, setNow] = useState(Date.now());
@@ -121,22 +122,23 @@ export default function Fasting() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 40 },
-  timer: { fontSize: 36, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
-  small: { fontSize: 13, color: colors.muted, marginVertical: 2 },
-  times: { flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch', marginTop: 20 },
-  timeText: { fontSize: 15, color: colors.text },
-  title: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
-  plans: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  plan: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20, backgroundColor: colors.bg },
-  planActive: { backgroundColor: colors.primary },
-  planText: { fontSize: 15, fontWeight: '600', color: colors.text },
-  historyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: { padding: 16, paddingBottom: 40 },
+    timer: { fontSize: 36, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+    small: { fontSize: 13, color: colors.muted, marginVertical: 2 },
+    times: { flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'stretch', marginTop: 20 },
+    timeText: { fontSize: 15, color: colors.text },
+    title: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
+    plans: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    plan: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20, backgroundColor: colors.bg },
+    planActive: { backgroundColor: colors.primary },
+    planText: { fontSize: 15, fontWeight: '600', color: colors.text },
+    historyRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+  });

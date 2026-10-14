@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { LayoutChangeEvent, Text, View } from 'react-native';
 import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
-import { colors } from '../lib/theme';
+import { useColors } from '../lib/theme';
 import { WeightEntry } from '../lib/types';
 
 const HEIGHT = 180;
 const PAD = { top: 16, bottom: 22, left: 34, right: 12 };
 
 export function WeightChart({ weights, target }: { weights: WeightEntry[]; target: number }) {
+  const colors = useColors();
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
 

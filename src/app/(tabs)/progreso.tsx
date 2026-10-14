@@ -4,9 +4,10 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Bar, Button, Card, NumberInput, parseNumber } from '../../components/ui';
 import { WeightChart } from '../../components/WeightChart';
 import { useStore } from '../../lib/store';
-import { colors } from '../../lib/theme';
+import { Palette, useThemed } from '../../lib/theme';
 
 export default function Progress() {
+  const { colors, styles } = useThemed(makeStyles);
   const { data, logWeight, removeWeight } = useStore();
   const profile = data.profile!;
   const [input, setInput] = useState('');
@@ -63,7 +64,11 @@ export default function Progress() {
           {[...data.weights].reverse().map((w) => (
             <View key={w.date} style={styles.row}>
               <Text style={styles.rowText}>
-                {new Date(w.date + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {new Date(w.date + 'T12:00:00').toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                 <Text style={[styles.rowText, { fontWeight: '700' }]}>{w.kg} kg</Text>
@@ -90,6 +95,7 @@ export default function Progress() {
 }
 
 function Stat({ label, value, big }: { label: string; value: number; big?: boolean }) {
+  const { colors, styles } = useThemed(makeStyles);
   return (
     <View style={{ alignItems: 'center', flex: 1 }}>
       <Text style={[styles.statValue, big && { fontSize: 30, color: colors.primary }]}>{value}</Text>
@@ -98,19 +104,20 @@ function Stat({ label, value, big }: { label: string; value: number; big?: boole
   );
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 40 },
-  statsRow: { flexDirection: 'row', alignItems: 'flex-end' },
-  statValue: { fontSize: 20, fontWeight: '700', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted, marginTop: 6, textAlign: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-  rowText: { fontSize: 15, color: colors.text },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: { padding: 16, paddingBottom: 40 },
+    statsRow: { flexDirection: 'row', alignItems: 'flex-end' },
+    statValue: { fontSize: 20, fontWeight: '700', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted, marginTop: 6, textAlign: 'center' },
+    title: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 12 },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 10,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    rowText: { fontSize: 15, color: colors.text },
+  });

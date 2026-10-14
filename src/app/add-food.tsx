@@ -5,10 +5,11 @@ import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, TextIn
 import { NutriScore } from '../components/ui';
 import { searchFoods } from '../lib/openFoodFacts';
 import { useStore } from '../lib/store';
-import { colors } from '../lib/theme';
+import { Palette, useThemed } from '../lib/theme';
 import { Food } from '../lib/types';
 
 export default function AddFood() {
+  const { colors, styles } = useThemed(makeStyles);
   const { date, meal } = useLocalSearchParams<{ date: string; meal: string }>();
   const { data } = useStore();
   const [query, setQuery] = useState('');
@@ -40,8 +41,7 @@ export default function AddFood() {
     };
   }, [query]);
 
-  const open = (food: Food) =>
-    router.push({ pathname: '/food', params: { date, meal, food: JSON.stringify(food) } });
+  const open = (food: Food) => router.push({ pathname: '/food', params: { date, meal, food: JSON.stringify(food) } });
 
   const list = results ?? data.recentFoods;
 
@@ -55,16 +55,14 @@ export default function AddFood() {
             onChangeText={setQuery}
             placeholder="Buscar alimento o marca"
             placeholderTextColor={colors.muted}
+            keyboardAppearance={colors.dark ? 'dark' : 'light'}
             style={styles.searchInput}
             autoFocus
             returnKeyType="search"
             clearButtonMode="while-editing"
           />
         </View>
-        <Pressable
-          style={styles.scanBtn}
-          onPress={() => router.push({ pathname: '/scan', params: { date, meal } })}
-        >
+        <Pressable style={styles.scanBtn} onPress={() => router.push({ pathname: '/scan', params: { date, meal } })}>
           <Ionicons name="barcode-outline" size={26} color="#fff" />
         </Pressable>
       </View>
@@ -84,13 +82,13 @@ export default function AddFood() {
         data={list}
         keyExtractor={(f, i) => `${f.code ?? f.name}-${i}`}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={
-          !results && list.length > 0 ? <Text style={styles.section}>Recientes</Text> : null
-        }
+        ListHeaderComponent={!results && list.length > 0 ? <Text style={styles.section}>Recientes</Text> : null}
         ListEmptyComponent={
           !loading && !error ? (
             <Text style={styles.empty}>
-              {results ? 'Sin resultados. Prueba otro nombre o escanea el código.' : 'Busca un alimento o escanea su código de barras.'}
+              {results
+                ? 'Sin resultados. Prueba otro nombre o escanea el código.'
+                : 'Busca un alimento o escanea su código de barras.'}
             </Text>
           ) : null
         }
@@ -119,44 +117,52 @@ export default function AddFood() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  searchRow: { flexDirection: 'row', gap: 10, padding: 16, paddingBottom: 8 },
-  searchBox: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  searchInput: { flex: 1, fontSize: 16, paddingVertical: 12, color: colors.text },
-  scanBtn: {
-    width: 48,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  customRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8 },
-  customText: { color: colors.primary, fontSize: 15, fontWeight: '500' },
-  section: { fontSize: 13, fontWeight: '700', color: colors.muted, paddingHorizontal: 16, paddingVertical: 8, textTransform: 'uppercase' },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: colors.card,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  thumb: { width: 44, height: 44, borderRadius: 8, backgroundColor: colors.bg },
-  thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: 15, fontWeight: '500', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
-  empty: { textAlign: 'center', color: colors.muted, marginTop: 30, paddingHorizontal: 32, lineHeight: 20 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    searchRow: { flexDirection: 'row', gap: 10, padding: 16, paddingBottom: 8 },
+    searchBox: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    searchInput: { flex: 1, fontSize: 16, paddingVertical: 12, color: colors.text },
+    scanBtn: {
+      width: 48,
+      borderRadius: 12,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    customRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8 },
+    customText: { color: colors.primary, fontSize: 15, fontWeight: '500' },
+    section: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.muted,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      textTransform: 'uppercase',
+    },
+    item: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      backgroundColor: colors.card,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    thumb: { width: 44, height: 44, borderRadius: 8, backgroundColor: colors.bg },
+    thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
+    name: { fontSize: 15, fontWeight: '500', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
+    empty: { textAlign: 'center', color: colors.muted, marginTop: 30, paddingHorizontal: 32, lineHeight: 20 },
+  });

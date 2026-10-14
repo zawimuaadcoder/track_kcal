@@ -1,9 +1,19 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Button, Card, NumberInput, NutriScore, parseNumber } from '../components/ui';
 import { useStore } from '../lib/store';
-import { colors } from '../lib/theme';
+import { Palette, useThemed } from '../lib/theme';
 import { Food, MEALS, MealType } from '../lib/types';
 
 /**
@@ -13,7 +23,14 @@ import { Food, MEALS, MealType } from '../lib/types';
  *  - custom=1     → crear un alimento a mano
  */
 export default function FoodScreen() {
-  const params = useLocalSearchParams<{ date: string; meal?: string; food?: string; entryId?: string; custom?: string }>();
+  const { colors, styles } = useThemed(makeStyles);
+  const params = useLocalSearchParams<{
+    date: string;
+    meal?: string;
+    food?: string;
+    entryId?: string;
+    custom?: string;
+  }>();
   const { getDay, addEntry, updateEntryGrams, removeEntry } = useStore();
   const date = params.date;
   const entry = params.entryId ? getDay(date).entries.find((e) => e.id === params.entryId) : undefined;
@@ -74,6 +91,7 @@ export default function FoodScreen() {
               onChangeText={setName}
               placeholder="Ej. Tortilla de patatas"
               placeholderTextColor={colors.muted}
+              keyboardAppearance={colors.dark ? 'dark' : 'light'}
               style={styles.textInput}
               autoFocus
             />
@@ -105,9 +123,7 @@ export default function FoodScreen() {
               .filter((v, i, a) => a.indexOf(v) === i)
               .map((v) => (
                 <Pressable key={v} style={styles.chip} onPress={() => setGrams(String(v))}>
-                  <Text style={styles.chipText}>
-                    {v === food?.servingGrams ? `1 ración (${v} g)` : `${v} g`}
-                  </Text>
+                  <Text style={styles.chipText}>{v === food?.servingGrams ? `1 ración (${v} g)` : `${v} g`}</Text>
                 </Pressable>
               ))}
           </View>
@@ -156,7 +172,18 @@ export default function FoodScreen() {
   );
 }
 
-function Field({ label, value, onChange, suffix }: { label: string; value: string; onChange: (s: string) => void; suffix: string }) {
+function Field({
+  label,
+  value,
+  onChange,
+  suffix,
+}: {
+  label: string;
+  value: string;
+  onChange: (s: string) => void;
+  suffix: string;
+}) {
+  const { styles } = useThemed(makeStyles);
   return (
     <View style={{ width: '48%' }}>
       <Text style={styles.smallLabel}>{label}</Text>
@@ -166,6 +193,7 @@ function Field({ label, value, onChange, suffix }: { label: string; value: strin
 }
 
 function Nutr({ label, value, color, unit = '' }: { label: string; value: number; color: string; unit?: string }) {
+  const { styles } = useThemed(makeStyles);
   return (
     <View style={{ alignItems: 'center', flex: 1 }}>
       <Text style={[styles.nutrValue, { color }]}>
@@ -177,29 +205,30 @@ function Nutr({ label, value, color, unit = '' }: { label: string; value: number
   );
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 40 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  image: { width: 64, height: 64, borderRadius: 10, backgroundColor: colors.bg },
-  title: { fontSize: 18, fontWeight: '700', color: colors.text },
-  muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
-  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 8, marginTop: 4 },
-  smallLabel: { fontSize: 13, color: colors.muted, marginBottom: 4, marginTop: 8 },
-  textInput: {
-    fontSize: 17,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    color: colors.text,
-    marginBottom: 12,
-  },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10, marginBottom: 8 },
-  chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: colors.bg },
-  chipActive: { backgroundColor: colors.primary },
-  chipText: { fontSize: 14, color: colors.text, fontWeight: '500' },
-  nutrRow: { flexDirection: 'row' },
-  nutrValue: { fontSize: 20, fontWeight: '700' },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: { padding: 16, paddingBottom: 40 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    image: { width: 64, height: 64, borderRadius: 10, backgroundColor: colors.bg },
+    title: { fontSize: 18, fontWeight: '700', color: colors.text },
+    muted: { fontSize: 13, color: colors.muted, marginTop: 2 },
+    label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 8, marginTop: 4 },
+    smallLabel: { fontSize: 13, color: colors.muted, marginBottom: 4, marginTop: 8 },
+    textInput: {
+      fontSize: 17,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      color: colors.text,
+      marginBottom: 12,
+    },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10, marginBottom: 8 },
+    chip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, backgroundColor: colors.bg },
+    chipActive: { backgroundColor: colors.primary },
+    chipText: { fontSize: 14, color: colors.text, fontWeight: '500' },
+    nutrRow: { flexDirection: 'row' },
+    nutrValue: { fontSize: 20, fontWeight: '700' },
+  });

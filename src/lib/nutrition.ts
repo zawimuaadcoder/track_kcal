@@ -42,7 +42,7 @@ export function sumNutrients(entries: LogEntry[]): Nutrients {
         fat: acc.fat + n.fat,
       };
     },
-    { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+    { kcal: 0, protein: 0, carbs: 0, fat: 0 },
   );
 }
 

@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { calorieGoalFor, dateKey } from './nutrition';
-import { AppData, DayLog, Food, LogEntry, MealType, Profile } from './types';
+import { AppData, Appearance, DayLog, Food, LogEntry, MealType, Profile } from './types';
 
 const STORAGE_KEY = 'myfitpalace:data:v1';
 
 const EMPTY: AppData = {
+  appearance: { accent: 'violeta', mode: 'system' },
   profile: null,
   days: {},
   weights: [],
@@ -30,6 +31,7 @@ type Store = {
   startFast: (targetHours: number) => void;
   endFast: () => void;
   setFastTarget: (hours: number) => void;
+  setAppearance: (patch: Partial<Appearance>) => void;
   resetAll: () => void;
 };
 
@@ -47,7 +49,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (raw) setData({ ...EMPTY, ...JSON.parse(raw) });
+        if (raw) {
+          const saved = JSON.parse(raw);
+          setData({ ...EMPTY, ...saved, appearance: { ...EMPTY.appearance, ...saved.appearance } });
+        }
       })
       .catch(() => {})
       .finally(() => setLoaded(true));
@@ -71,7 +76,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const logWeight = useCallback((kg: number, date = dateKey()) => {
     setData((s) => {
       const weights = [...s.weights.filter((w) => w.date !== date), { date, kg }].sort((a, b) =>
-        a.date.localeCompare(b.date)
+        a.date.localeCompare(b.date),
       );
       const latest = weights[weights.length - 1];
       return {
@@ -99,8 +104,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         weights: [{ date: dateKey(), kg: currentWeight }],
       }));
     },
-    updateProfile: (patch) =>
-      setData((s) => (s.profile ? { ...s, profile: { ...s.profile, ...patch } } : s)),
+    updateProfile: (patch) => setData((s) => (s.profile ? { ...s, profile: { ...s.profile, ...patch } } : s)),
     addEntry: (date, meal, food, grams) => {
       updateDay(date, (d) => ({ ...d, entries: [...d.entries, { id: newId(), meal, food, grams }] }));
       setData((s) => ({
@@ -116,8 +120,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...d,
         entries: d.entries.map((e: LogEntry) => (e.id === id ? { ...e, grams } : e)),
       })),
-    removeEntry: (date, id) =>
-      updateDay(date, (d) => ({ ...d, entries: d.entries.filter((e) => e.id !== id) })),
+    removeEntry: (date, id) => updateDay(date, (d) => ({ ...d, entries: d.entries.filter((e) => e.id !== id) })),
     addWater: (date, ml) => updateDay(date, (d) => ({ ...d, waterMl: Math.max(0, d.waterMl + ml) })),
     logWeight,
     removeWeight: (date) => setData((s) => ({ ...s, weights: s.weights.filter((w) => w.date !== date) })),
@@ -137,7 +140,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         };
       }),
     setFastTarget: (hours) => setData((s) => ({ ...s, fasting: { ...s.fasting, targetHours: hours } })),
-    resetAll: () => setData(EMPTY),
+    setAppearance: (patch) => setData((s) => ({ ...s, appearance: { ...s.appearance, ...patch } })),
+    // Conserva la apariencia elegida al borrar los datos
+    resetAll: () => setData((s) => ({ ...EMPTY, appearance: s.appearance })),
   };
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;

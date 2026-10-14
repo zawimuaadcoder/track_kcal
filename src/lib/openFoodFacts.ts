@@ -65,7 +65,5 @@ export async function searchFoods(query: string, signal?: AbortSignal): Promise<
   const res = await fetch(url, { headers: HEADERS, signal });
   if (!res.ok) throw new Error(`Error ${res.status} en la búsqueda`);
   const json = await res.json();
-  return ((json.products ?? []) as OffProduct[])
-    .map(toFood)
-    .filter((f): f is Food => !!f && f.per100g.kcal > 0);
+  return ((json.products ?? []) as OffProduct[]).map(toFood).filter((f): f is Food => !!f && f.per100g.kcal > 0);
 }

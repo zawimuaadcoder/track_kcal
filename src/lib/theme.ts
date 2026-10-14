@@ -1,18 +1,119 @@
-// Tema provisional: se sustituirá cuando lleguen las referencias de diseño.
-export const colors = {
-  bg: '#F4F6F8',
-  card: '#FFFFFF',
-  text: '#1B1F24',
-  muted: '#6B7380',
-  border: '#E3E7EC',
-  primary: '#2E7DF6',
-  accent: '#20B486',
-  danger: '#E5484D',
-  carbs: '#F5A524',
-  protein: '#E5484D',
-  fat: '#8E5CF6',
-  water: '#3BA7F0',
+import { createContext, useContext, useMemo } from 'react';
+
+export type AccentName = 'violeta' | 'coral';
+export type ThemeMode = 'system' | 'light' | 'dark';
+
+export type Palette = {
+  dark: boolean;
+  bg: string;
+  card: string;
+  text: string;
+  muted: string;
+  border: string;
+  primary: string;
+  primarySoft: string;
+  onPrimary: string;
+  accent: string;
+  danger: string;
+  carbs: string;
+  protein: string;
+  fat: string;
+  water: string;
 };
 
-export const radius = 16;
+const shared = {
+  onPrimary: '#FFFFFF',
+  carbs: '#F2A516',
+  fat: '#3BB4C1',
+  water: '#2E9CF2',
+};
+
+export const PALETTES: Record<AccentName, { light: Palette; dark: Palette }> = {
+  violeta: {
+    light: {
+      ...shared,
+      dark: false,
+      bg: '#EFEDF7',
+      card: '#FFFFFF',
+      text: '#16122A',
+      muted: '#6F6A82',
+      border: '#E4E0F0',
+      primary: '#6E4BFF',
+      primarySoft: '#ECE7FF',
+      accent: '#1FAF7A',
+      danger: '#E5484D',
+      protein: '#E9545A',
+    },
+    dark: {
+      ...shared,
+      dark: true,
+      bg: '#120F1C',
+      card: '#1D1930',
+      text: '#F1EFFA',
+      muted: '#9A93B5',
+      border: '#2C2742',
+      primary: '#8F75FF',
+      primarySoft: '#2A2250',
+      accent: '#34C98E',
+      danger: '#FF6369',
+      protein: '#F06B70',
+    },
+  },
+  coral: {
+    light: {
+      ...shared,
+      dark: false,
+      bg: '#F6EEF0',
+      card: '#FFFFFF',
+      text: '#2A1218',
+      muted: '#7D6A70',
+      border: '#EEE1E5',
+      primary: '#F2456A',
+      primarySoft: '#FFE4EA',
+      accent: '#1FAF7A',
+      danger: '#D93036',
+      protein: '#8D63F2',
+    },
+    dark: {
+      ...shared,
+      dark: true,
+      bg: '#1A1013',
+      card: '#261A1E',
+      text: '#FAF0F2',
+      muted: '#A88E95',
+      border: '#3A2A2F',
+      primary: '#FF5C7D',
+      primarySoft: '#42202A',
+      accent: '#34C98E',
+      danger: '#FF6369',
+      protein: '#A586FF',
+    },
+  },
+};
+
+export const ACCENT_OPTIONS: { key: AccentName; label: string }[] = [
+  { key: 'violeta', label: 'Violeta' },
+  { key: 'coral', label: 'Coral' },
+];
+
+export const MODE_OPTIONS: { key: ThemeMode; label: string }[] = [
+  { key: 'system', label: 'Automático' },
+  { key: 'light', label: 'Claro' },
+  { key: 'dark', label: 'Oscuro' },
+];
+
+export const radius = 22;
 export const spacing = 16;
+
+export const ThemeContext = createContext<Palette>(PALETTES.violeta.light);
+
+export function useColors(): Palette {
+  return useContext(ThemeContext);
+}
+
+/** Devuelve la paleta activa y los estilos generados a partir de ella. */
+export function useThemed<T>(makeStyles: (c: Palette) => T): { colors: Palette; styles: T } {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors, makeStyles]);
+  return { colors, styles };
+}
