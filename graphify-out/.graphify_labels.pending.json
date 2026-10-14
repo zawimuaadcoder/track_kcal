@@ -11,5 +11,7 @@
   "9": "MyFitPalace",
   "10": "tsconfig.json",
   "11": "CLAUDE.md",
-  "12": "ayuno.tsx"
+  "12": "FloatingTabBar.tsx",
+  "13": "scripts",
+  "14": "build-ipa.sh"
 }

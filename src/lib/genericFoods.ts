@@ -59,7 +59,7 @@ const ROWS: Row[] = [
   ['Pan integral', 247, 13, 41, 3.4, 40, 'pan'],
   ['Pan de molde', 265, 8, 47, 4.5, 25, 'pan'],
   ['Tostada de pan', 313, 11, 56, 4.5, 30, 'pan tostado'],
-  ['Avena en copos', 379, 13, 60, 6.5, 40, 'avena porridge flocons'],,
+  ['Avena en copos', 379, 13, 60, 6.5, 40, 'avena porridge flocons'],
   ['Cereales de desayuno', 380, 7, 84, 1, 30, 'corn flakes'],
   ['Muesli', 370, 10, 66, 6, 50],
   ['Quinoa cocida', 120, 4.4, 21, 1.9, 150, 'quinoa'],
