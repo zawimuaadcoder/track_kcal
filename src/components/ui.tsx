@@ -152,8 +152,8 @@ const makeStyles = (colors: Palette) =>
     },
     button: {
       paddingVertical: 16,
-      paddingHorizontal: 20,
-      borderRadius: 16,
+      paddingHorizontal: 22,
+      borderRadius: 999,
       alignItems: 'center',
     },
     buttonText: { fontSize: 16, fontFamily: fonts.semibold },

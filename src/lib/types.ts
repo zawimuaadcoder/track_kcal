@@ -69,4 +69,6 @@ export type AppData = {
   recentFoods: Food[];
   /** Último día en que se mostró la animación de racha */
   streakCelebratedOn?: string;
+  /** Consejo cerrado hoy: "fecha|id" */
+  dismissedInsight?: string;
 };

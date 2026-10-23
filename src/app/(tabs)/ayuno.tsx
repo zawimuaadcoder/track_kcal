@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../../components/Screen';
-import { Button, Card, Ring } from '../../components/ui';
+import { GradientRing, InsightCard, SoftGradient, StatCard } from '../../components/bevel';
+import { Button, Card } from '../../components/ui';
 import { confirm } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
 import { fonts, Palette, useThemed } from '../../lib/theme';
@@ -36,6 +37,37 @@ function formatTime(ts: number) {
   return `${weekday} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+/** Fases orientativas del ayuno para la tarjeta de consejo. */
+function fastingPhase(hours: number) {
+  if (hours < 4)
+    return {
+      icon: 'restaurant' as const,
+      tint: '#F2A516',
+      title: 'Digestión',
+      body: 'Tu cuerpo aún está procesando la última comida.',
+    };
+  if (hours < 12)
+    return {
+      icon: 'pulse' as const,
+      tint: '#2E9CF2',
+      title: 'Azúcar estable',
+      body: 'La insulina baja y el cuerpo empieza a tirar de sus reservas.',
+    };
+  if (hours < 16)
+    return {
+      icon: 'flame' as const,
+      tint: '#FF7A1A',
+      title: 'Quema de grasa',
+      body: 'Las reservas de glucógeno bajan y empiezas a usar más grasa como energía.',
+    };
+  return {
+    icon: 'sparkles' as const,
+    tint: '#22A04A',
+    title: 'Cetosis ligera',
+    body: 'Buen trabajo. Bebe agua y rompe el ayuno con una comida equilibrada.',
+  };
+}
+
 export default function Fasting() {
   const { colors, styles } = useThemed(makeStyles);
   const { data, startFast, endFast, setFastTarget } = useStore();
@@ -60,16 +92,22 @@ export default function Fasting() {
 
   return (
     <Screen title="Ayuno">
-      <Card style={styles.ringCard}>
-        <Ring size={250} stroke={18} progress={elapsed / targetMs} color={done ? colors.accent : colors.primary}>
+      <View style={styles.hero}>
+        <SoftGradient from={colors.dark ? '#1B2A4A' : '#D8EBFF'} to={colors.bg} />
+        <GradientRing
+          size={250}
+          stroke={20}
+          progress={elapsed / targetMs}
+          from={done ? '#2BD48F' : '#C8F23A'}
+          to={done ? '#14A37F' : '#22C55E'}
+          glossy
+        >
           {startedAt ? (
             <>
               <Text style={styles.ringSmall}>{done ? '¡Objetivo cumplido!' : 'Tiempo de ayuno'}</Text>
               <Text style={styles.timer}>{formatClock(elapsed)}</Text>
-              <Text style={styles.ringSmall}>
-                {done
-                  ? `+${formatHoursMinutes(elapsed - targetMs)}`
-                  : `Quedan ${formatHoursMinutes(targetMs - elapsed)}`}
+              <Text style={[styles.pct, { color: done ? '#14A37F' : '#22A04A' }]}>
+                {Math.min(100, Math.round((elapsed / targetMs) * 100))}%
               </Text>
             </>
           ) : (
@@ -79,20 +117,23 @@ export default function Fasting() {
               <Text style={styles.ringSmall}>Listo para empezar</Text>
             </>
           )}
-        </Ring>
-        {startedAt ? (
-          <View style={styles.times}>
-            <View>
-              <Text style={styles.timeLabel}>Inicio</Text>
-              <Text style={styles.timeValue}>{formatTime(startedAt)}</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={styles.timeLabel}>Objetivo</Text>
-              <Text style={styles.timeValue}>{formatTime(startedAt + targetMs)}</Text>
-            </View>
+        </GradientRing>
+      </View>
+
+      {startedAt ? (
+        <>
+          <View style={styles.statRow}>
+            <StatCard style={{ flex: 1 }} icon="play-circle-outline" label="Inicio" value={formatTime(startedAt)} />
+            <StatCard
+              style={{ flex: 1 }}
+              icon="flag-outline"
+              label={done ? 'Extra' : 'Quedan'}
+              value={done ? `+${formatHoursMinutes(elapsed - targetMs)}` : formatHoursMinutes(targetMs - elapsed)}
+            />
           </View>
-        ) : null}
-      </Card>
+          <InsightCard {...fastingPhase(elapsed / 3600_000)} />
+        </>
+      ) : null}
 
       <Card>
         <Text style={styles.cardTitle}>Plan</Text>
@@ -138,7 +179,14 @@ export default function Fasting() {
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
-    ringCard: { alignItems: 'center', paddingVertical: 32 },
+    hero: {
+      alignItems: 'center',
+      paddingVertical: 28,
+      borderRadius: 32,
+      overflow: 'hidden',
+    },
+    pct: { fontFamily: fonts.extrabold, fontSize: 18, textAlign: 'center' },
+    statRow: { flexDirection: 'row', gap: 10 },
     ringSmall: { fontFamily: fonts.regular, fontSize: 15, color: colors.muted, textAlign: 'center' },
     timer: {
       fontFamily: fonts.extrabold,

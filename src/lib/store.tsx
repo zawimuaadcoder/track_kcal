@@ -39,6 +39,7 @@ type Store = {
   setFastTarget: (hours: number) => void;
   setAppearance: (patch: Partial<Appearance>) => void;
   markStreakCelebrated: (date: string) => void;
+  dismissInsight: (key: string) => void;
   resetAll: () => void;
 };
 
@@ -223,6 +224,7 @@ export function StoreProvider({
       }),
     setFastTarget: (hours) => setData((s) => ({ ...s, fasting: { ...s.fasting, targetHours: hours } })),
     markStreakCelebrated: (date) => setData((s) => ({ ...s, streakCelebratedOn: date })),
+    dismissInsight: (key) => setData((s) => ({ ...s, dismissedInsight: key })),
     setAppearance: (patch) => setData((s) => ({ ...s, appearance: { ...s.appearance, ...patch } })),
     // Conserva la apariencia elegida al borrar los datos
     resetAll: () => setData((s) => ({ ...EMPTY, appearance: s.appearance })),

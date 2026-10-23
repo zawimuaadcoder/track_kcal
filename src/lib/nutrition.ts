@@ -71,3 +71,11 @@ export function formatDateLabel(key: string): string {
   if (key === shiftDate(today, 1)) return `Mañana, ${label}`;
   return label;
 }
+
+/** Comida que toca según la hora: desayuno hasta las 11, comida hasta las 16, cena desde las 19. */
+export function mealForNow(hour = new Date().getHours()): 'desayuno' | 'comida' | 'cena' | 'snacks' {
+  if (hour < 11) return 'desayuno';
+  if (hour < 16) return 'comida';
+  if (hour >= 19) return 'cena';
+  return 'snacks';
+}

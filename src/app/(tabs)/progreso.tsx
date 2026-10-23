@@ -1,12 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { GradientRing, SoftGradient, StatCard } from '../../components/bevel';
 import { Screen } from '../../components/Screen';
 import { Bar, Button, Card, NumberInput, parseNumber } from '../../components/ui';
 import { WeightChart } from '../../components/WeightChart';
 import { confirm } from '../../lib/dialog';
+import { dateKey, shiftDate, sumNutrients } from '../../lib/nutrition';
 import { useStore } from '../../lib/store';
 import { fonts, Palette, useThemed } from '../../lib/theme';
+
+const fmtKg = (n: number) => n.toFixed(1).replace('.', ',');
 
 export default function Progress() {
   const { colors, styles } = useThemed(makeStyles);
@@ -20,7 +24,18 @@ export default function Progress() {
   const done = Math.abs(currentWeight - startWeight);
   const remaining = Math.abs(targetWeight - currentWeight);
   const progress = totalToGo > 0 ? done / totalToGo : 1;
-  const changed = currentWeight - startWeight;
+  const week = useMemo(() => {
+    const today = dateKey();
+    const totals = Array.from(
+      { length: 7 },
+      (_, i) => sumNutrients(data.days[shiftDate(today, -i)]?.entries ?? []).kcal,
+    );
+    const logged = totals.filter((k) => k > 0);
+    return {
+      logged: logged.length,
+      avg: logged.length ? Math.round(logged.reduce((a, b) => a + b, 0) / logged.length) : 0,
+    };
+  }, [data.days]);
 
   const save = () => {
     if (!(kg >= 30 && kg <= 300)) return;
@@ -30,20 +45,31 @@ export default function Progress() {
 
   return (
     <Screen title="Progreso">
-      <Card>
-        <View style={styles.statsRow}>
-          <Stat label="Inicio" value={startWeight} />
-          <Stat label="Actual" value={currentWeight} big />
-          <Stat label="Objetivo" value={targetWeight} />
-        </View>
-        <View style={{ marginTop: 16 }}>
-          <Bar progress={progress} color={colors.accent} />
-        </View>
-        <Text style={styles.muted}>
-          {changed === 0 ? 'Sin cambios todavía' : `${changed > 0 ? '+' : ''}${changed.toFixed(1)} kg desde el inicio`}
-          {remaining > 0.05 ? ` · faltan ${remaining.toFixed(1)} kg` : ' · ¡objetivo alcanzado!'}
-        </Text>
-      </Card>
+      <View style={styles.hero}>
+        <SoftGradient from={colors.dark ? '#1E3A2E' : '#DDF7EA'} to={colors.bg} />
+        <GradientRing size={210} stroke={18} progress={progress} from="#7EE8B5" to={colors.accent} glossy>
+          <Text style={styles.heroPct}>
+            {Math.round(Math.min(progress, 1) * 100)}
+            <Text style={styles.heroPctUnit}>%</Text>
+          </Text>
+          <Text style={styles.heroSub}>{remaining > 0.05 ? `Faltan ${fmtKg(remaining)} kg` : '¡Objetivo!'}</Text>
+        </GradientRing>
+      </View>
+      <View style={styles.statRow}>
+        <StatCard style={{ flex: 1 }} icon="flag-outline" label="Inicio" value={fmtKg(startWeight)} unit="kg" />
+        <StatCard style={{ flex: 1 }} icon="scale-outline" label="Actual" value={fmtKg(currentWeight)} unit="kg" />
+        <StatCard style={{ flex: 1 }} icon="trophy-outline" label="Meta" value={fmtKg(targetWeight)} unit="kg" />
+      </View>
+      <View style={styles.statRow}>
+        <StatCard
+          style={{ flex: 1 }}
+          icon="flame-outline"
+          label="Media 7 días"
+          value={week.avg ? String(week.avg) : '–'}
+          unit="kcal"
+        />
+        <StatCard style={{ flex: 1 }} icon="calendar-outline" label="Días registrados" value={`${week.logged}/7`} />
+      </View>
 
       <Card>
         <Text style={styles.title}>Registrar peso de hoy</Text>
@@ -105,6 +131,17 @@ function Stat({ label, value, big }: { label: string; value: number; big?: boole
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
+    hero: { alignItems: 'center', paddingVertical: 24, borderRadius: 32, overflow: 'hidden' },
+    heroPct: {
+      fontFamily: fonts.extrabold,
+      fontSize: 44,
+      color: colors.text,
+      textAlign: 'center',
+      fontVariant: ['tabular-nums'],
+    },
+    heroPctUnit: { fontFamily: fonts.bold, fontSize: 22, color: colors.muted },
+    heroSub: { fontFamily: fonts.medium, fontSize: 14, color: colors.muted, textAlign: 'center' },
+    statRow: { flexDirection: 'row', gap: 10 },
     container: { padding: 16, paddingBottom: 40 },
     statsRow: { flexDirection: 'row', alignItems: 'flex-end' },
     statValue: { fontSize: 20, fontFamily: fonts.bold, color: colors.text },

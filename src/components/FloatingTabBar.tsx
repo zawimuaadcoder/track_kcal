@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { dateKey, mealForNow } from '../lib/nutrition';
 import { fonts, Palette, useThemed } from '../lib/theme';
+import { PressScale } from './motion';
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -43,20 +45,28 @@ export function FloatingTabBar({ state, navigation, insets }: TabBarProps) {
               }}
               style={[styles.tab, focused && styles.tabActive]}
             >
-              <Ionicons name={ICONS[route.name] ?? 'ellipse-outline'} size={22} color={color} />
+              <Ionicons name={ICONS[route.name] ?? 'ellipse-outline'} size={21} color={color} />
               <Text style={[styles.label, { color }]}>{LABELS[route.name] ?? route.name}</Text>
             </Pressable>
           );
         })}
       </View>
+      <PressScale
+        onPress={() => router.push({ pathname: '/add-food', params: { date: dateKey(), meal: mealForNow() } })}
+        style={styles.fab}
+        accessibilityLabel="Añadir alimento"
+      >
+        <Ionicons name="add" size={30} color={colors.onPrimary} />
+      </PressScale>
     </View>
   );
 }
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
-    wrap: { position: 'absolute', left: 14, right: 14 },
+    wrap: { position: 'absolute', left: 14, right: 14, flexDirection: 'row', alignItems: 'center', gap: 10 },
     bar: {
+      flex: 1,
       flexDirection: 'row',
       justifyContent: 'space-around',
       backgroundColor: colors.card,
@@ -68,7 +78,20 @@ const makeStyles = (colors: Palette) =>
       shadowOffset: { width: 0, height: 6 },
       elevation: 8,
     },
-    tab: { alignItems: 'center', gap: 2, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20 },
+    tab: { alignItems: 'center', gap: 2, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 20 },
+    fab: {
+      width: 62,
+      height: 62,
+      borderRadius: 31,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.primary,
+      shadowOpacity: 0.4,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 8,
+    },
     tabActive: { backgroundColor: colors.primarySoft },
     label: { fontSize: 11, fontFamily: fonts.semibold },
   });

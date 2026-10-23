@@ -11,7 +11,9 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Button, Card, NumberInput, NutriScore, parseNumber } from '../components/ui';
+import { mealForNow } from '../lib/nutrition';
 import { useStore } from '../lib/store';
 import { fonts, Palette, useThemed } from '../lib/theme';
 import { Food, MEALS, MealType } from '../lib/types';
@@ -42,7 +44,7 @@ export default function FoodScreen() {
     return null;
   }, [entry, params.food]);
 
-  const [meal, setMeal] = useState<MealType>((entry?.meal ?? params.meal ?? 'desayuno') as MealType);
+  const [meal, setMeal] = useState<MealType>((entry?.meal ?? params.meal ?? mealForNow()) as MealType);
   const [grams, setGrams] = useState(String(entry?.grams ?? initialFood?.servingGrams ?? 100));
   const [name, setName] = useState('');
   const [kcal, setKcal] = useState('');
@@ -105,11 +107,24 @@ export default function FoodScreen() {
           </Card>
         ) : (
           <Card style={styles.header}>
-            {initialFood!.imageUrl ? <Image source={{ uri: initialFood!.imageUrl }} style={styles.image} /> : null}
-            <View style={{ flex: 1 }}>
-              <Text style={styles.title}>{initialFood!.name}</Text>
-              {initialFood!.brand ? <Text style={styles.muted}>{initialFood!.brand}</Text> : null}
-              <Text style={styles.muted}>{initialFood!.per100g.kcal} kcal / 100 g</Text>
+            <View style={styles.imageTile}>
+              {initialFood!.imageUrl ? (
+                <Image source={{ uri: initialFood!.imageUrl }} style={styles.image} />
+              ) : (
+                <Ionicons name="leaf-outline" size={30} color={colors.primary} />
+              )}
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <View style={styles.titleRow}>
+                <Text style={styles.title} numberOfLines={2}>
+                  {initialFood!.name}
+                </Text>
+                <Ionicons name="checkmark-circle" size={18} color={colors.water} />
+              </View>
+              <Text style={styles.muted}>
+                {initialFood!.brand ?? (initialFood!.code?.startsWith('generic:') ? 'Básico' : 'Producto')} ·{' '}
+                {initialFood!.per100g.kcal} kcal / 100 g
+              </Text>
             </View>
             <NutriScore grade={initialFood!.nutriscore} />
           </Card>
@@ -146,26 +161,40 @@ export default function FoodScreen() {
           )}
         </Card>
 
-        <Card>
-          <View style={styles.nutrRow}>
-            <Nutr label="kcal" value={(food?.per100g.kcal ?? 0) * f} color={colors.text} />
-            <Nutr label="Carbos" value={(food?.per100g.carbs ?? 0) * f} color={colors.carbs} unit="g" />
-            <Nutr label="Proteína" value={(food?.per100g.protein ?? 0) * f} color={colors.protein} unit="g" />
-            <Nutr label="Grasa" value={(food?.per100g.fat ?? 0) * f} color={colors.fat} unit="g" />
+        <Card style={styles.summary}>
+          <View style={styles.summaryRow}>
+            <Ionicons name="flame" size={18} color={colors.text} />
+            <Text style={styles.summaryKcal}>{Math.round((food?.per100g.kcal ?? 0) * f)} kcal</Text>
+            <View style={{ flex: 1 }} />
+            <MacroChip icon="barbell" color={colors.protein} value={(food?.per100g.protein ?? 0) * f} />
+            <MacroChip icon="leaf" color={colors.carbs} value={(food?.per100g.carbs ?? 0) * f} />
+            <MacroChip icon="water" color={colors.fat} value={(food?.per100g.fat ?? 0) * f} />
+          </View>
+          <View style={styles.summaryDivider} />
+          <View style={styles.legend}>
+            <Text style={[styles.legendText, { color: colors.protein }]}>Proteína</Text>
+            <Text style={[styles.legendText, { color: colors.carbs }]}>Carbohidratos</Text>
+            <Text style={[styles.legendText, { color: colors.fat }]}>Grasa</Text>
           </View>
         </Card>
 
-        <Button title={entry ? 'Guardar' : 'Añadir'} onPress={save} disabled={!valid} />
+        <Button
+          title={entry ? 'Guardar cambios' : 'Añadir al diario'}
+          onPress={save}
+          disabled={!valid}
+          style={styles.cta}
+        />
         {entry && (
-          <Button
-            title="Eliminar"
-            variant="danger"
-            style={{ marginTop: 10 }}
+          <Pressable
+            style={styles.removeRow}
             onPress={() => {
               removeEntry(date, entry.id);
               router.back();
             }}
-          />
+          >
+            <Ionicons name="remove-circle-outline" size={18} color={colors.danger} />
+            <Text style={styles.removeText}>Quitar del diario</Text>
+          </Pressable>
         )}
       </ScrollView>
     </KeyboardAvoidingView>
@@ -198,6 +227,16 @@ function Field({
   );
 }
 
+function MacroChip({ icon, color, value }: { icon: 'barbell' | 'leaf' | 'water'; color: string; value: number }) {
+  const { styles } = useThemed(makeStyles);
+  return (
+    <View style={styles.macroChip}>
+      <Ionicons name={icon} size={13} color={color} />
+      <Text style={[styles.macroChipText, { color }]}>{value.toFixed(value < 10 ? 1 : 0).replace('.', ',')} g</Text>
+    </View>
+  );
+}
+
 function Nutr({ label, value, color, unit = '' }: { label: string; value: number; color: string; unit?: string }) {
   const { styles } = useThemed(makeStyles);
   return (
@@ -213,9 +252,32 @@ function Nutr({ label, value, color, unit = '' }: { label: string; value: number
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
+    imageTile: {
+      width: 68,
+      height: 68,
+      borderRadius: 16,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      backgroundColor: colors.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    summary: { paddingVertical: 14 },
+    summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    summaryKcal: { fontFamily: fonts.bold, fontSize: 18, color: colors.text },
+    macroChip: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+    macroChipText: { fontFamily: fonts.semibold, fontSize: 15, fontVariant: ['tabular-nums'] },
+    summaryDivider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border, marginVertical: 10 },
+    legend: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
+    legendText: { fontFamily: fonts.medium, fontSize: 12 },
+    cta: { borderRadius: 999, paddingVertical: 18 },
+    removeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14 },
+    removeText: { fontFamily: fonts.semibold, fontSize: 15, color: colors.danger },
     container: { padding: 16, paddingBottom: 40, gap: 12 },
     header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    image: { width: 64, height: 64, borderRadius: 10, backgroundColor: colors.bg },
+    image: { width: '100%', height: '100%' },
     title: { fontSize: 18, fontFamily: fonts.bold, color: colors.text },
     muted: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 2 },
     label: { fontSize: 15, fontFamily: fonts.semibold, color: colors.text, marginBottom: 8, marginTop: 4 },
