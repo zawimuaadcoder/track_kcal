@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../../components/Screen';
 import { Button, Card, Ring } from '../../components/ui';
+import { confirm } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
 import { fonts, Palette, useThemed } from '../../lib/theme';
 
@@ -54,10 +55,7 @@ export default function Fasting() {
 
   const confirmEnd = () => {
     if (done) return endFast();
-    Alert.alert('¿Terminar el ayuno?', 'Aún no has llegado a tu objetivo.', [
-      { text: 'Seguir', style: 'cancel' },
-      { text: 'Terminar', style: 'destructive', onPress: endFast },
-    ]);
+    confirm('¿Terminar el ayuno?', 'Aún no has llegado a tu objetivo.', 'Terminar', endFast, 'Seguir');
   };
 
   return (
@@ -69,7 +67,9 @@ export default function Fasting() {
               <Text style={styles.ringSmall}>{done ? '¡Objetivo cumplido!' : 'Tiempo de ayuno'}</Text>
               <Text style={styles.timer}>{formatClock(elapsed)}</Text>
               <Text style={styles.ringSmall}>
-                {done ? `+${formatHoursMinutes(elapsed - targetMs)}` : `Quedan ${formatHoursMinutes(targetMs - elapsed)}`}
+                {done
+                  ? `+${formatHoursMinutes(elapsed - targetMs)}`
+                  : `Quedan ${formatHoursMinutes(targetMs - elapsed)}`}
               </Text>
             </>
           ) : (
@@ -114,12 +114,7 @@ export default function Fasting() {
       </Card>
 
       {startedAt ? (
-        <Button
-          title="Terminar ayuno"
-          variant={done ? 'primary' : 'danger'}
-          onPress={confirmEnd}
-          style={styles.cta}
-        />
+        <Button title="Terminar ayuno" variant={done ? 'primary' : 'danger'} onPress={confirmEnd} style={styles.cta} />
       ) : (
         <Button title="Empezar ayuno" onPress={() => startFast(targetHours)} style={styles.cta} />
       )}

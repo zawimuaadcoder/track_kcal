@@ -1,9 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { api, ApiError } from './api';
 import { calorieGoalFor, dateKey } from './nutrition';
 import { AppData, Appearance, DayLog, Food, LogEntry, MealType, Profile } from './types';
 
-const STORAGE_KEY = 'myfitpalace:data:v1';
+const LEGACY_KEY = 'myfitpalace:data:v1';
+const cacheKey = (profileId: string) => `myfitpalace:data:v2:${profileId}`;
+const SAVE_DELAY_MS = 700;
 
 const EMPTY: AppData = {
   appearance: { accent: 'violeta', mode: 'system' },
@@ -16,9 +19,12 @@ const EMPTY: AppData = {
 
 const EMPTY_DAY: DayLog = { entries: [], waterMl: 0 };
 
+export type SyncStatus = 'idle' | 'saving' | 'saved' | 'offline';
+
 type Store = {
   data: AppData;
   loaded: boolean;
+  sync: SyncStatus;
   getDay: (date: string) => DayLog;
   setupProfile: (currentWeight: number, targetWeight: number) => void;
   updateProfile: (patch: Partial<Profile>) => void;
@@ -42,22 +48,82 @@ function newId() {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function StoreProvider({ children }: { children: ReactNode }) {
+function hydrate(saved: Partial<AppData> | null | undefined): AppData {
+  if (!saved) return EMPTY;
+  return { ...EMPTY, ...saved, appearance: { ...EMPTY.appearance, ...saved.appearance } };
+}
+
+const isEmpty = (d: Partial<AppData> | null | undefined) => !d || !d.profile;
+
+/**
+ * Datos de un perfil. La fuente de verdad es Supabase; se guarda también una copia
+ * local para abrir al instante y seguir funcionando sin conexión.
+ */
+export function StoreProvider({
+  token,
+  profileId,
+  onSessionExpired,
+  children,
+}: {
+  token: string;
+  profileId: string;
+  onSessionExpired: () => void;
+  children: ReactNode;
+}) {
   const [data, setData] = useState<AppData>(EMPTY);
   const [loaded, setLoaded] = useState(false);
+  const [sync, setSync] = useState<SyncStatus>('idle');
   const skipSave = useRef(true);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        if (raw) {
-          const saved = JSON.parse(raw);
-          setData({ ...EMPTY, ...saved, appearance: { ...EMPTY.appearance, ...saved.appearance } });
+    let cancelled = false;
+    (async () => {
+      const cached = await AsyncStorage.getItem(cacheKey(profileId)).catch(() => null);
+      if (cached && !cancelled) {
+        setData(hydrate(JSON.parse(cached)));
+        setLoaded(true);
+      }
+      try {
+        let remote = (await api.load(token)) as Partial<AppData> | null;
+        if (isEmpty(remote)) {
+          // Primer uso: traer los datos que hubiera en este dispositivo antes de los perfiles
+          const legacy = await AsyncStorage.getItem(LEGACY_KEY).catch(() => null);
+          if (legacy && !isEmpty(JSON.parse(legacy))) {
+            remote = JSON.parse(legacy);
+            await api.save(token, remote);
+            await AsyncStorage.removeItem(LEGACY_KEY).catch(() => {});
+          }
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
-  }, []);
+        if (!cancelled && (!isEmpty(remote) || !cached)) {
+          skipSave.current = true;
+          setData(hydrate(remote));
+        }
+        if (!cancelled) setSync('saved');
+      } catch (e) {
+        if (e instanceof ApiError && /caducada/i.test(e.message)) onSessionExpired();
+        else if (!cancelled) setSync('offline');
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, profileId, onSessionExpired]);
+
+  // Si se cambia de perfil con un guardado pendiente, se envía antes de salir
+  const latest = useRef(data);
+  latest.current = data;
+  useEffect(
+    () => () => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+        api.save(token, latest.current).catch(() => {});
+      }
+    },
+    [token],
+  );
 
   useEffect(() => {
     if (!loaded) return;
@@ -65,8 +131,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       skipSave.current = false;
       return;
     }
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {});
-  }, [data, loaded]);
+    AsyncStorage.setItem(cacheKey(profileId), JSON.stringify(data)).catch(() => {});
+    setSync('saving');
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      api
+        .save(token, data)
+        .then(() => {
+          timer.current = null;
+          setSync('saved');
+        })
+        .catch((e) => {
+          if (e instanceof ApiError && /caducada/i.test(e.message)) onSessionExpired();
+          else setSync('offline');
+        });
+    }, SAVE_DELAY_MS);
+  }, [data, loaded, token, profileId, onSessionExpired]);
 
   const updateDay = useCallback((date: string, fn: (d: DayLog) => DayLog) => {
     setData((s) => ({ ...s, days: { ...s.days, [date]: fn(s.days[date] ?? EMPTY_DAY) } }));
@@ -91,6 +171,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const store: Store = {
     data,
     loaded,
+    sync,
     getDay,
     setupProfile: (currentWeight, targetWeight) => {
       setData((s) => ({

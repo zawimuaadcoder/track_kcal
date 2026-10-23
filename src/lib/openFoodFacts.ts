@@ -1,8 +1,10 @@
+import { Platform } from 'react-native';
 import { Food } from './types';
 
 // Open Food Facts: base de datos abierta y gratuita, muy completa para productos de Francia.
 const BASE = 'https://fr.openfoodfacts.org';
-const HEADERS = { 'User-Agent': 'MyFitPalace/1.0 (uso personal)' };
+// En el navegador no se puede fijar User-Agent y una cabecera propia forzaría una petición CORS previa.
+const HEADERS: Record<string, string> = Platform.OS === 'web' ? {} : { 'User-Agent': 'MyFitPalace/1.0 (uso personal)' };
 const FIELDS =
   'code,product_name,product_name_fr,product_name_es,brands,nutriments,nutriscore_grade,image_front_small_url,serving_quantity';
 
@@ -60,7 +62,7 @@ export async function getProductByBarcode(code: string): Promise<Food | null> {
 
 export async function searchFoods(query: string, signal?: AbortSignal): Promise<Food[]> {
   const url =
-    `${BASE}/cgi/search.pl?search_simple=1&action=process&json=1&page_size=25` +
+    `${BASE}/cgi/search.pl?search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n` +
     `&search_terms=${encodeURIComponent(query)}&fields=${FIELDS}`;
   const res = await fetch(url, { headers: HEADERS, signal });
   if (!res.ok) throw new Error(`Error ${res.status} en la búsqueda`);

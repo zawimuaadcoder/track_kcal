@@ -1,14 +1,19 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ProfileAvatar } from '../../components/ProfileGate';
 import { Screen } from '../../components/Screen';
 import { Button, Card, NumberInput, parseNumber } from '../../components/ui';
 import { calorieGoalFor, macroGoals } from '../../lib/nutrition';
+import { confirm, notify } from '../../lib/dialog';
+import { api } from '../../lib/api';
+import { useSession } from '../../lib/session';
 import { useStore } from '../../lib/store';
 import { ACCENT_OPTIONS, fonts, MODE_OPTIONS, Palette, PALETTES, useThemed } from '../../lib/theme';
 
 export default function Settings() {
   const { colors, styles } = useThemed(makeStyles);
-  const { data, updateProfile, resetAll, setAppearance } = useStore();
+  const { data, updateProfile, resetAll, setAppearance, sync } = useStore();
+  const { session, signOut, dropSession } = useSession();
   const { accent, mode } = data.appearance;
   const profile = data.profile!;
   const [target, setTarget] = useState(String(profile.targetWeight));
@@ -23,11 +28,28 @@ export default function Settings() {
 
   const save = () => {
     updateProfile({ targetWeight: t, calorieGoal: Math.round(k), waterGoalMl: Math.round(w * 1000) });
-    Alert.alert('Guardado');
+    notify('Guardado');
   };
 
   return (
     <Screen title="Ajustes">
+      {session ? (
+        <Card style={styles.profileCard}>
+          <ProfileAvatar color={session.profile.color} size={56} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.profileName}>{session.profile.name}</Text>
+            <Text style={styles.syncText}>
+              {sync === 'saving'
+                ? 'Guardando…'
+                : sync === 'offline'
+                  ? 'Sin conexión: se guardará al volver'
+                  : 'Datos guardados en la nube'}
+            </Text>
+          </View>
+          <Button title="Cambiar" variant="secondary" onPress={signOut} style={styles.switchBtn} />
+        </Card>
+      ) : null}
+
       <Text style={styles.section}>Apariencia</Text>
       <Card>
         <Text style={[styles.label, { marginTop: 0 }]}>Color</Text>
@@ -94,20 +116,42 @@ export default function Settings() {
 
       <View style={{ marginTop: 40 }}>
         <Text style={styles.muted}>
-          Datos de alimentos: Open Food Facts (openfoodfacts.org), licencia ODbL. Todos tus datos se guardan solo en
-          este móvil.
+          Datos de alimentos: Open Food Facts (openfoodfacts.org), licencia ODbL. Tus datos se guardan en tu perfil, en
+          la nube.
         </Text>
         <Button
           title="Borrar todos los datos"
           variant="danger"
           style={{ marginTop: 16 }}
           onPress={() =>
-            Alert.alert('¿Borrar todo?', 'Se eliminarán tu diario, pesos y ayunos. No se puede deshacer.', [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Borrar', style: 'destructive', onPress: resetAll },
-            ])
+            confirm(
+              '¿Borrar todo?',
+              'Se eliminarán tu diario, pesos y ayunos. No se puede deshacer.',
+              'Borrar',
+              resetAll,
+            )
           }
         />
+        {session ? (
+          <Button
+            title="Eliminar este perfil"
+            variant="secondary"
+            style={{ marginTop: 10 }}
+            onPress={() =>
+              confirm(
+                `¿Eliminar el perfil "${session.profile.name}"?`,
+                'Se borrarán el perfil y todos sus datos. No se puede deshacer.',
+                'Eliminar',
+                () => {
+                  api
+                    .deleteProfile(session.token)
+                    .then(dropSession)
+                    .catch((e) => notify('No se pudo eliminar', e.message));
+                },
+              )
+            }
+          />
+        ) : null}
       </View>
     </Screen>
   );
@@ -128,6 +172,10 @@ const makeStyles = (colors: Palette) =>
       marginLeft: 4,
     },
     row: { flexDirection: 'row', gap: 10 },
+    profileCard: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    profileName: { fontFamily: fonts.bold, fontSize: 19, color: colors.text },
+    syncText: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 2 },
+    switchBtn: { paddingVertical: 10, paddingHorizontal: 14 },
     option: {
       flex: 1,
       flexDirection: 'row',

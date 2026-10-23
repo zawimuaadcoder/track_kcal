@@ -20,7 +20,14 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro",
+      "name": "MyFitPalace",
+      "shortName": "MyFitPalace",
+      "themeColor": "#6E4BFF",
+      "backgroundColor": "#EFEDF7",
+      "lang": "es"
     },
     "plugins": [
       "expo-router",

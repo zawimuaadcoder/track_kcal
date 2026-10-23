@@ -13,6 +13,7 @@ export function normalize(s: string): string {
 
 /** Quita plurales simples para que "huevos" encuentre "huevo" */
 function stem(w: string): string {
+  if (w.length > 4 && w.endsWith('ces')) return w.slice(0, -3) + 'z'; // nueces → nuez
   if (w.length > 4 && w.endsWith('es')) return w.slice(0, -2);
   if (w.length > 3 && w.endsWith('s')) return w.slice(0, -1);
   return w;
@@ -37,7 +38,8 @@ export function scoreFood(query: string, name: string, keywords = ''): number {
   if (q.length === 0) return 0;
   const n = words(name);
   const k = words(keywords);
-  const matches = (w: string, list: string[]) => list.some((x) => x.startsWith(w) || (x.length >= 3 && w.startsWith(x)));
+  const matches = (w: string, list: string[]) =>
+    list.some((x) => x.startsWith(w) || (x.length >= 3 && w.startsWith(x)));
 
   let hits = 0;
   for (const w of q) if (matches(w, n) || matches(w, k)) hits++;
@@ -50,9 +52,10 @@ export function scoreFood(query: string, name: string, keywords = ''): number {
   return score;
 }
 
-export function searchGeneric(query: string, limit = 8): Food[] {
+/** Los 4 alimentos básicos que mejor encajan; solo coincidencias claras. */
+export function searchGeneric(query: string, limit = 4): Food[] {
   return GENERIC_FOODS.map((f) => ({ f, s: scoreFood(query, f.name, f.keywords) }))
-    .filter((x) => x.s > 0)
+    .filter((x) => x.s >= 60)
     .sort((a, b) => b.s - a.s)
     .slice(0, limit)
     .map((x) => {

@@ -1,5 +1,15 @@
-import { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
+import { ReactNode, useEffect, useRef } from 'react';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { fonts, Palette, radius, spacing, useThemed } from '../lib/theme';
 
@@ -104,11 +114,20 @@ export function Ring({
 
 export function Bar({ progress, color }: { progress: number; color: string }) {
   const { styles } = useThemed(makeStyles);
+  const target = Math.min(Math.max(progress, 0), 1);
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: target,
+      duration: 700,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [target, anim]);
+  const width = anim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
   return (
     <View style={styles.barTrack}>
-      <View
-        style={[styles.barFill, { width: `${Math.min(Math.max(progress, 0), 1) * 100}%`, backgroundColor: color }]}
-      />
+      <Animated.View style={[styles.barFill, { width, backgroundColor: color }]} />
     </View>
   );
 }
@@ -147,7 +166,14 @@ const makeStyles = (colors: Palette) =>
       borderRadius: 12,
       paddingHorizontal: 14,
     },
-    input: { flex: 1, fontFamily: fonts.regular, fontSize: 20, paddingVertical: 12, color: colors.text },
+    input: {
+      outlineWidth: 0,
+      flex: 1,
+      fontFamily: fonts.regular,
+      fontSize: 20,
+      paddingVertical: 12,
+      color: colors.text,
+    },
     suffix: { fontFamily: fonts.regular, fontSize: 16, color: colors.muted, marginLeft: 6 },
     barTrack: { height: 6, borderRadius: 3, backgroundColor: colors.border, overflow: 'hidden' },
     barFill: { height: 6, borderRadius: 3 },

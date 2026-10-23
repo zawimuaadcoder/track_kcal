@@ -187,7 +187,13 @@ function Field({
   return (
     <View style={{ width: '48%' }}>
       <Text style={styles.smallLabel}>{label}</Text>
-      <NumberInput value={value} onChangeText={onChange} suffix={suffix} style={{ fontFamily: fonts.regular, fontSize: 17 }} placeholder="0" />
+      <NumberInput
+        value={value}
+        onChangeText={onChange}
+        suffix={suffix}
+        style={{ fontFamily: fonts.regular, fontSize: 17 }}
+        placeholder="0"
+      />
     </View>
   );
 }
@@ -215,7 +221,8 @@ const makeStyles = (colors: Palette) =>
     label: { fontSize: 15, fontFamily: fonts.semibold, color: colors.text, marginBottom: 8, marginTop: 4 },
     smallLabel: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginBottom: 4, marginTop: 8 },
     textInput: {
-      fontFamily: fonts.regular, fontSize: 17,
+      fontFamily: fonts.regular,
+      fontSize: 17,
       paddingVertical: 12,
       paddingHorizontal: 14,
       borderWidth: 1,

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AnimatedNumber, FadeIn, PressScale } from '../../components/motion';
 import { Screen } from '../../components/Screen';
 import { StreakCelebration } from '../../components/StreakCelebration';
 import { Bar, Card } from '../../components/ui';
@@ -63,81 +64,100 @@ export default function Diary() {
             <Ionicons name="chevron-forward" size={22} color={colors.muted} />
           </Pressable>
         </View>
-        <Text style={[styles.big, remaining < 0 && { color: colors.danger }]}>{formatInt(Math.abs(remaining))}</Text>
+        <View style={styles.eatenRow}>
+          <Ionicons name="restaurant-outline" size={14} color={colors.muted} />
+          <Text style={styles.eatenText}>
+            Comido <Text style={styles.eatenValue}>{formatInt(totals.kcal)}</Text> kcal
+          </Text>
+        </View>
+        <AnimatedNumber
+          value={Math.abs(remaining)}
+          format={formatInt}
+          style={[styles.big, remaining < 0 && { color: colors.danger }]}
+        />
         <Text style={styles.bigLabel}>{remaining < 0 ? 'kcal de más' : 'kcal restantes'}</Text>
+        <View style={styles.heroBar}>
+          <Bar progress={totals.kcal / profile.calorieGoal} color={remaining < 0 ? colors.danger : colors.primary} />
+        </View>
         <View style={styles.pill}>
           <Text style={styles.pillText}>Objetivo {formatInt(profile.calorieGoal)} kcal</Text>
         </View>
       </View>
 
-      <Card style={styles.macros}>
-        <Macro label="Carbohidratos" value={totals.carbs} goal={goals.carbs} color={colors.carbs} />
-        <Macro label="Proteína" value={totals.protein} goal={goals.protein} color={colors.protein} />
-        <Macro label="Grasa" value={totals.fat} goal={goals.fat} color={colors.fat} />
-      </Card>
+      <FadeIn delay={60}>
+        <Card style={styles.macros}>
+          <Macro label="Carbohidratos" value={totals.carbs} goal={goals.carbs} color={colors.carbs} />
+          <Macro label="Proteína" value={totals.protein} goal={goals.protein} color={colors.protein} />
+          <Macro label="Grasa" value={totals.fat} goal={goals.fat} color={colors.fat} />
+        </Card>
+      </FadeIn>
 
-      {MEALS.map((meal) => {
+      {MEALS.map((meal, mealIndex) => {
         const entries = day.entries.filter((e) => e.meal === meal.key);
         const kcal = sumNutrients(entries).kcal;
         return (
-          <Card key={meal.key}>
-            <View style={styles.mealHeader}>
-              <View>
-                <Text style={styles.mealTitle}>{meal.label}</Text>
-                <Text style={styles.mealKcal}>{formatInt(kcal)} kcal</Text>
+          <FadeIn key={meal.key} delay={120 + mealIndex * 70}>
+            <Card>
+              <View style={styles.mealHeader}>
+                <View>
+                  <Text style={styles.mealTitle}>{meal.label}</Text>
+                  <Text style={styles.mealKcal}>{formatInt(kcal)} kcal</Text>
+                </View>
+                <PressScale
+                  onPress={() => router.push({ pathname: '/add-food', params: { date, meal: meal.key } })}
+                  style={styles.addBtn}
+                  hitSlop={8}
+                  accessibilityLabel={`Añadir a ${meal.label}`}
+                >
+                  <Ionicons name="add" size={28} color={colors.onPrimary} />
+                </PressScale>
               </View>
-              <Pressable
-                onPress={() => router.push({ pathname: '/add-food', params: { date, meal: meal.key } })}
-                style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.8 }]}
-                hitSlop={8}
-                accessibilityLabel={`Añadir a ${meal.label}`}
-              >
-                <Ionicons name="add" size={28} color={colors.onPrimary} />
-              </Pressable>
-            </View>
-            {entries.map((e) => (
-              <Pressable
-                key={e.id}
-                style={styles.entry}
-                onPress={() => router.push({ pathname: '/food', params: { date, entryId: e.id } })}
-              >
-                <Text style={styles.entryName} numberOfLines={1}>
-                  {e.food.name}
-                </Text>
-                <Text style={styles.entryMeta}>
-                  {e.grams} g · {formatInt(entryNutrients(e).kcal)}
-                </Text>
-              </Pressable>
-            ))}
-          </Card>
+              {entries.map((e) => (
+                <Pressable
+                  key={e.id}
+                  style={styles.entry}
+                  onPress={() => router.push({ pathname: '/food', params: { date, entryId: e.id } })}
+                >
+                  <Text style={styles.entryName} numberOfLines={1}>
+                    {e.food.name}
+                  </Text>
+                  <Text style={styles.entryMeta}>
+                    {e.grams} g · {formatInt(entryNutrients(e).kcal)}
+                  </Text>
+                </Pressable>
+              ))}
+            </Card>
+          </FadeIn>
         );
       })}
 
-      <Card>
-        <View style={styles.mealHeader}>
-          <View>
-            <Text style={styles.mealTitle}>Agua</Text>
-            <Text style={styles.mealKcal}>
-              {formatLiters(day.waterMl, 2)} / {formatLiters(profile.waterGoalMl, 1)} L
-            </Text>
-          </View>
-          <Pressable
-            onPress={() => addWater(date, -GLASS_ML)}
-            hitSlop={8}
-            disabled={day.waterMl <= 0}
-            accessibilityLabel="Quitar un vaso"
-          >
-            <Ionicons name="remove-circle-outline" size={30} color={colors.muted} />
-          </Pressable>
-        </View>
-        <View style={styles.glasses}>
-          {Array.from({ length: Math.max(glasses, filled + 1) }).map((_, i) => (
-            <Pressable key={i} onPress={() => i >= filled && addWater(date, GLASS_ML)} hitSlop={4}>
-              <View style={[styles.glass, i < filled && styles.glassFull]} />
+      <FadeIn delay={420}>
+        <Card>
+          <View style={styles.mealHeader}>
+            <View>
+              <Text style={styles.mealTitle}>Agua</Text>
+              <Text style={styles.mealKcal}>
+                {formatLiters(day.waterMl, 2)} / {formatLiters(profile.waterGoalMl, 1)} L
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => addWater(date, -GLASS_ML)}
+              hitSlop={8}
+              disabled={day.waterMl <= 0}
+              accessibilityLabel="Quitar un vaso"
+            >
+              <Ionicons name="remove-circle-outline" size={30} color={colors.muted} />
             </Pressable>
-          ))}
-        </View>
-      </Card>
+          </View>
+          <View style={styles.glasses}>
+            {Array.from({ length: Math.max(glasses, filled + 1) }).map((_, i) => (
+              <Pressable key={i} onPress={() => i >= filled && addWater(date, GLASS_ML)} hitSlop={4}>
+                <View style={[styles.glass, i < filled && styles.glassFull]} />
+              </Pressable>
+            ))}
+          </View>
+        </Card>
+      </FadeIn>
     </Screen>
   );
 }
@@ -158,6 +178,10 @@ function Macro({ label, value, goal, color }: { label: string; value: number; go
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     hero: { alignItems: 'center', paddingTop: 4, paddingBottom: 18 },
+    eatenRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 16 },
+    eatenText: { fontFamily: fonts.medium, fontSize: 14, color: colors.muted },
+    eatenValue: { fontFamily: fonts.bold, color: colors.text },
+    heroBar: { width: 180, marginTop: 12 },
     streakChip: {
       alignSelf: 'flex-end',
       flexDirection: 'row',
@@ -177,7 +201,7 @@ const makeStyles = (colors: Palette) =>
       fontSize: 64,
       letterSpacing: -2,
       color: colors.text,
-      marginTop: 18,
+      marginTop: 2,
       fontVariant: ['tabular-nums'],
     },
     bigLabel: { fontFamily: fonts.regular, fontSize: 16, color: colors.muted, marginTop: -2 },

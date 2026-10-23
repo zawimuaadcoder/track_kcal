@@ -46,3 +46,6 @@ graphify-out/cache/hook_sessions/
 # Build local de iOS
 /ios
 MyFitPalace.ipa
+
+# Export web
+/dist

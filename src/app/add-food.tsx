@@ -48,7 +48,14 @@ export default function AddFood() {
   const trimmed = query.trim();
   const generic = useMemo(() => (trimmed.length >= 2 ? searchGeneric(trimmed) : []), [trimmed]);
   const searching = trimmed.length >= 2;
-  const list = searching ? [...generic, ...(results ?? [])] : data.recentFoods;
+  type Row = Food | { header: string };
+  const products = results ?? [];
+  const list: Row[] = searching
+    ? [
+        ...(generic.length ? [{ header: 'Básicos' }, ...generic] : []),
+        ...(products.length ? [{ header: 'Productos y marcas' }, ...products] : []),
+      ]
+    : data.recentFoods;
 
   return (
     <View style={styles.container}>
@@ -80,10 +87,9 @@ export default function AddFood() {
         <Text style={styles.customText}>Crear alimento manualmente</Text>
       </Pressable>
 
-
       <FlatList
         data={list}
-        keyExtractor={(f, i) => `${f.code ?? f.name}-${i}`}
+        keyExtractor={(f, i) => ('header' in f ? `h-${f.header}` : `${f.code ?? f.name}-${i}`)}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={!searching && list.length > 0 ? <Text style={styles.section}>Recientes</Text> : null}
         ListFooterComponent={
@@ -102,31 +108,35 @@ export default function AddFood() {
             </Text>
           ) : null
         }
-        renderItem={({ item }) => (
-          <Pressable style={styles.item} onPress={() => open(item)}>
-            {item.imageUrl ? (
-              <Image source={{ uri: item.imageUrl }} style={styles.thumb} />
-            ) : (
-              <View style={[styles.thumb, styles.thumbEmpty]}>
-                <Ionicons
-                  name={item.code?.startsWith('generic:') ? 'leaf-outline' : 'nutrition-outline'}
-                  size={20}
-                  color={item.code?.startsWith('generic:') ? colors.primary : colors.muted}
-                />
+        renderItem={({ item }) =>
+          'header' in item ? (
+            <Text style={styles.section}>{item.header}</Text>
+          ) : (
+            <Pressable style={styles.item} onPress={() => open(item)}>
+              {item.imageUrl ? (
+                <Image source={{ uri: item.imageUrl }} style={styles.thumb} />
+              ) : (
+                <View style={[styles.thumb, styles.thumbEmpty]}>
+                  <Ionicons
+                    name={item.code?.startsWith('generic:') ? 'leaf-outline' : 'nutrition-outline'}
+                    size={20}
+                    color={item.code?.startsWith('generic:') ? colors.primary : colors.muted}
+                  />
+                </View>
+              )}
+              <View style={{ flex: 1 }}>
+                <Text style={styles.name} numberOfLines={1}>
+                  {item.name}
+                </Text>
+                <Text style={styles.muted} numberOfLines={1}>
+                  {item.per100g.kcal} kcal / 100 g
+                  {item.brand ? ` · ${item.brand}` : item.code?.startsWith('generic:') ? ' · Básico' : ''}
+                </Text>
               </View>
-            )}
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name} numberOfLines={1}>
-                {item.name}
-              </Text>
-              <Text style={styles.muted} numberOfLines={1}>
-                {item.per100g.kcal} kcal / 100 g
-                {item.brand ? ` · ${item.brand}` : item.code?.startsWith('generic:') ? ' · Básico' : ''}
-              </Text>
-            </View>
-            <NutriScore grade={item.nutriscore} />
-          </Pressable>
-        )}
+              <NutriScore grade={item.nutriscore} />
+            </Pressable>
+          )
+        }
       />
     </View>
   );
@@ -147,7 +157,14 @@ const makeStyles = (colors: Palette) =>
       borderWidth: 1,
       borderColor: colors.border,
     },
-    searchInput: { flex: 1, fontFamily: fonts.regular, fontSize: 16, paddingVertical: 12, color: colors.text },
+    searchInput: {
+      outlineWidth: 0,
+      flex: 1,
+      fontFamily: fonts.regular,
+      fontSize: 16,
+      paddingVertical: 12,
+      color: colors.text,
+    },
     scanBtn: {
       width: 48,
       borderRadius: 12,

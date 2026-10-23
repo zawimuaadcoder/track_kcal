@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../../components/Screen';
 import { Bar, Button, Card, NumberInput, parseNumber } from '../../components/ui';
 import { WeightChart } from '../../components/WeightChart';
+import { confirm } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
 import { fonts, Palette, useThemed } from '../../lib/theme';
 
@@ -76,12 +77,7 @@ export default function Progress() {
                 {data.weights.length > 1 && (
                   <Pressable
                     hitSlop={8}
-                    onPress={() =>
-                      Alert.alert('¿Borrar este registro?', undefined, [
-                        { text: 'Cancelar', style: 'cancel' },
-                        { text: 'Borrar', style: 'destructive', onPress: () => removeWeight(w.date) },
-                      ])
-                    }
+                    onPress={() => confirm('¿Borrar este registro?', undefined, 'Borrar', () => removeWeight(w.date))}
                   >
                     <Ionicons name="trash-outline" size={18} color={colors.muted} />
                   </Pressable>
@@ -99,7 +95,9 @@ function Stat({ label, value, big }: { label: string; value: number; big?: boole
   const { colors, styles } = useThemed(makeStyles);
   return (
     <View style={{ alignItems: 'center', flex: 1 }}>
-      <Text style={[styles.statValue, big && { fontFamily: fonts.regular, fontSize: 30, color: colors.primary }]}>{value}</Text>
+      <Text style={[styles.statValue, big && { fontFamily: fonts.regular, fontSize: 30, color: colors.primary }]}>
+        {value}
+      </Text>
       <Text style={styles.muted}>{label} (kg)</Text>
     </View>
   );
