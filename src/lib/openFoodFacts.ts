@@ -49,23 +49,50 @@ function toFood(p: OffProduct): Food | null {
   };
 }
 
+// Pasamos por nuestro proxy en Vercel (api/off.js): evita CORS y límites de OFF en el navegador.
+const PROXY = Platform.OS === 'web' ? '/api/off' : 'https://myfitpalace.vercel.app/api/off';
+
+async function viaProxy<T>(params: string, signal?: AbortSignal): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${PROXY}?${params}`, { signal });
+      if (res.ok) return (await res.json()) as T;
+      lastError = new Error(`Error ${res.status}`);
+    } catch (e) {
+      if (signal?.aborted) throw e;
+      lastError = e;
+    }
+  }
+  throw lastError;
+}
+
 export async function getProductByBarcode(code: string): Promise<Food | null> {
-  const res = await fetch(`${BASE}/api/v2/product/${encodeURIComponent(code)}.json?fields=${FIELDS}`, {
-    headers: HEADERS,
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Error ${res.status} al buscar el producto`);
-  const json = await res.json();
-  if (json.status !== 1 || !json.product) return null;
-  return toFood({ code, ...json.product });
+  try {
+    const { product } = await viaProxy<{ product: OffProduct | null }>(`code=${encodeURIComponent(code)}`);
+    return product ? toFood({ code, ...product }) : null;
+  } catch (e) {
+    if (Platform.OS === 'web') throw e;
+    // En el móvil, si el proxy falla, probamos directamente con OFF
+    const res = await fetch(`${BASE}/api/v2/product/${encodeURIComponent(code)}.json?fields=${FIELDS}`, { headers: HEADERS });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Error ${res.status} al buscar el producto`);
+    const json = await res.json();
+    if (json.status !== 1 || !json.product) return null;
+    return toFood({ code, ...json.product });
+  }
 }
 
 export async function searchFoods(query: string, signal?: AbortSignal): Promise<Food[]> {
-  const url =
-    `${BASE}/cgi/search.pl?search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n` +
-    `&search_terms=${encodeURIComponent(query)}&fields=${FIELDS}`;
-  const res = await fetch(url, { headers: HEADERS, signal });
-  if (!res.ok) throw new Error(`Error ${res.status} en la búsqueda`);
-  const json = await res.json();
-  return ((json.products ?? []) as OffProduct[]).map(toFood).filter((f): f is Food => !!f && f.per100g.kcal > 0);
+  const { products } = await viaProxy<{ products: OffProduct[] }>(`q=${encodeURIComponent(query)}`, signal);
+  const seen = new Set<string>();
+  return (products ?? [])
+    .map(toFood)
+    .filter((f): f is Food => !!f && f.per100g.kcal > 0)
+    .filter((f) => {
+      const key = f.code ?? `${f.name}|${f.brand}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
