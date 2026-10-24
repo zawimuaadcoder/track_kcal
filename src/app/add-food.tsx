@@ -2,11 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { NutriScore } from '../components/ui';
+import { Backdrop } from '../components/Backdrop';
+import { PressScale } from '../components/motion';
+import { IconBadge, NutriScore, VerticalGradient } from '../components/ui';
 import { searchFoods } from '../lib/openFoodFacts';
 import { rankFoods, searchGeneric } from '../lib/search';
 import { useStore } from '../lib/store';
-import { fonts, Palette, useThemed } from '../lib/theme';
+import { depth, fonts, Palette, useThemed } from '../lib/theme';
 import { Food } from '../lib/types';
 
 export default function AddFood() {
@@ -59,8 +61,9 @@ export default function AddFood() {
 
   return (
     <View style={styles.container}>
+      <Backdrop />
       <View style={styles.searchRow}>
-        <View style={styles.searchBox}>
+        <View style={[styles.searchBox, depth(1, colors)]}>
           <Ionicons name="search" size={18} color={colors.muted} />
           <TextInput
             value={query}
@@ -74,9 +77,15 @@ export default function AddFood() {
             clearButtonMode="while-editing"
           />
         </View>
-        <Pressable style={styles.scanBtn} onPress={() => router.push({ pathname: '/scan', params: { date, meal } })}>
+        <PressScale
+          style={[styles.scanBtn, depth(2, colors, colors.primary)]}
+          onPress={() => router.push({ pathname: '/scan', params: { date, meal } })}
+          accessibilityLabel="Escanear código de barras"
+        >
+          <VerticalGradient top={colors.primaryLight} bottom={colors.primary} />
+          <View pointerEvents="none" style={styles.scanShine} />
           <Ionicons name="barcode-outline" size={26} color="#fff" />
-        </Pressable>
+        </PressScale>
       </View>
 
       <Pressable
@@ -112,16 +121,19 @@ export default function AddFood() {
           'header' in item ? (
             <Text style={styles.section}>{item.header}</Text>
           ) : (
-            <Pressable style={styles.item} onPress={() => open(item)}>
+            <Pressable
+              style={({ pressed }) => [styles.item, depth(1, colors), pressed && { transform: [{ scale: 0.985 }] }]}
+              onPress={() => open(item)}
+            >
               {item.imageUrl ? (
-                <Image source={{ uri: item.imageUrl }} style={styles.thumb} />
+                <View style={styles.thumbWrap}>
+                  <Image source={{ uri: item.imageUrl }} style={styles.thumbImg} />
+                </View>
+              ) : item.code?.startsWith('generic:') ? (
+                <IconBadge name="leaf" color={colors.accent} size={48} />
               ) : (
-                <View style={[styles.thumb, styles.thumbEmpty]}>
-                  <Ionicons
-                    name={item.code?.startsWith('generic:') ? 'leaf-outline' : 'nutrition-outline'}
-                    size={20}
-                    color={item.code?.startsWith('generic:') ? colors.primary : colors.muted}
-                  />
+                <View style={styles.thumbWrap}>
+                  <Ionicons name="nutrition-outline" size={20} color={colors.muted} />
                 </View>
               )}
               <View style={{ flex: 1 }}>
@@ -134,6 +146,7 @@ export default function AddFood() {
                 </Text>
               </View>
               <NutriScore grade={item.nutriscore} />
+              <Ionicons name="add-circle" size={26} color={colors.primary} />
             </Pressable>
           )
         }
@@ -152,49 +165,75 @@ const makeStyles = (colors: Palette) =>
       alignItems: 'center',
       gap: 8,
       backgroundColor: colors.card,
-      borderRadius: 12,
-      paddingHorizontal: 12,
-      borderWidth: 1,
+      borderRadius: 18,
+      paddingHorizontal: 14,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
     },
     searchInput: {
       outlineWidth: 0,
       flex: 1,
-      fontFamily: fonts.regular,
+      fontFamily: fonts.medium,
       fontSize: 16,
-      paddingVertical: 12,
+      paddingVertical: 14,
       color: colors.text,
     },
     scanBtn: {
-      width: 48,
-      borderRadius: 12,
-      backgroundColor: colors.primary,
+      width: 52,
+      height: 52,
+      borderRadius: 18,
       alignItems: 'center',
       justifyContent: 'center',
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.25)',
     },
-    customRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8 },
-    customText: { color: colors.primary, fontSize: 15, fontFamily: fonts.medium },
+    scanShine: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 26,
+      backgroundColor: 'rgba(255,255,255,0.14)',
+    },
+    customRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 18, paddingVertical: 8 },
+    customText: { color: colors.primary, fontSize: 15, fontFamily: fonts.semibold },
     section: {
-      fontSize: 13,
+      fontSize: 12,
       fontFamily: fonts.bold,
       color: colors.muted,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: 18,
+      paddingTop: 14,
+      paddingBottom: 8,
       textTransform: 'uppercase',
+      letterSpacing: 0.8,
     },
     item: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
+      marginHorizontal: 14,
+      marginBottom: 8,
+      padding: 10,
+      paddingRight: 12,
+      borderRadius: 20,
       backgroundColor: colors.card,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.border,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
     },
-    thumb: { width: 44, height: 44, borderRadius: 8, backgroundColor: colors.bg },
-    thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
-    name: { fontSize: 15, fontFamily: fonts.medium, color: colors.text },
+    thumbWrap: {
+      width: 48,
+      height: 48,
+      borderRadius: 15,
+      backgroundColor: colors.bg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    thumbImg: { width: '100%', height: '100%' },
+    name: { fontSize: 15, fontFamily: fonts.semibold, color: colors.text },
     muted: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 2 },
     empty: { textAlign: 'center', color: colors.muted, marginTop: 30, paddingHorizontal: 32, lineHeight: 20 },
   });

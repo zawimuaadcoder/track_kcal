@@ -15,27 +15,35 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, ProfileSummary } from '../lib/api';
 import { useSession } from '../lib/session';
-import { fonts, Palette, useThemed } from '../lib/theme';
+import { depth, fonts, Palette, useColors, useThemed } from '../lib/theme';
+import { Backdrop } from './Backdrop';
 import { Mascot } from './Mascot';
-import { Button } from './ui';
+import { Button, VerticalGradient } from './ui';
 
 const PROFILE_COLORS = ['#6E4BFF', '#F2456A', '#FF7A1A', '#14A37F', '#2E9CF2', '#1B1F24'];
 
 type Mode = { kind: 'pick' } | { kind: 'password'; profile: ProfileSummary } | { kind: 'create' };
 
 export function ProfileAvatar({ color, size }: { color: string; size: number }) {
+  const colors = useColors();
   return (
     <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size * 0.26,
-        backgroundColor: color,
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-      }}
+      style={[
+        {
+          width: size,
+          height: size,
+          borderRadius: size * 0.26,
+          backgroundColor: color,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          borderWidth: size > 60 ? 1.5 : 1,
+          borderColor: 'rgba(255,255,255,0.35)',
+        },
+        size > 40 ? depth(2, colors, color) : null,
+      ]}
     >
+      <VerticalGradient top={`${color}99`} bottom={color} />
       <View
         style={{
           position: 'absolute',
@@ -80,6 +88,7 @@ export function ProfileGate() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <Backdrop />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <Animated.View
@@ -335,7 +344,8 @@ const makeStyles = (colors: Palette) =>
       borderRadius: 27,
       borderWidth: 2,
       borderStyle: 'dashed',
-      borderColor: colors.border,
+      borderColor: colors.dark ? '#3A3456' : '#D9D4EA',
+      backgroundColor: colors.dark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.6)',
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -349,11 +359,12 @@ const makeStyles = (colors: Palette) =>
       fontSize: 17,
       color: colors.text,
       backgroundColor: colors.card,
-      borderWidth: 1.5,
+      borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 14,
-      paddingVertical: 14,
+      borderRadius: 16,
+      paddingVertical: 15,
       paddingHorizontal: 16,
+      ...depth(1, colors),
     },
     colors: { flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 20 },
     colorDot: { width: 30, height: 30, borderRadius: 15, borderWidth: 3, borderColor: 'transparent' },

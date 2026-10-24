@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo } from 'react';
+import { Platform, ViewStyle } from 'react-native';
 
 export type AccentName = 'violeta' | 'coral';
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -12,6 +13,10 @@ export type Palette = {
   border: string;
   primary: string;
   primarySoft: string;
+  /** Tono claro del color principal, arriba en los degradados de botones */
+  primaryLight: string;
+  /** Línea de brillo en el borde superior de tarjetas y botones */
+  highlight: string;
   onPrimary: string;
   accent: string;
   danger: string;
@@ -33,13 +38,15 @@ export const PALETTES: Record<AccentName, { light: Palette; dark: Palette }> = {
     light: {
       ...shared,
       dark: false,
-      bg: '#EFEDF7',
+      bg: '#F4F3F9',
       card: '#FFFFFF',
       text: '#16122A',
-      muted: '#6F6A82',
-      border: '#E4E0F0',
+      muted: '#77728A',
+      border: '#E9E6F2',
       primary: '#6E4BFF',
-      primarySoft: '#ECE7FF',
+      primarySoft: '#EEEAFF',
+      primaryLight: '#9479FF',
+      highlight: 'rgba(255,255,255,0.9)',
       accent: '#1FAF7A',
       danger: '#E5484D',
       protein: '#E9545A',
@@ -47,13 +54,15 @@ export const PALETTES: Record<AccentName, { light: Palette; dark: Palette }> = {
     dark: {
       ...shared,
       dark: true,
-      bg: '#120F1C',
-      card: '#1D1930',
+      bg: '#0E0C17',
+      card: '#1A1729',
       text: '#F1EFFA',
       muted: '#9A93B5',
-      border: '#2C2742',
+      border: '#2A2640',
       primary: '#8F75FF',
-      primarySoft: '#2A2250',
+      primarySoft: '#262049',
+      primaryLight: '#AE9BFF',
+      highlight: 'rgba(255,255,255,0.08)',
       accent: '#34C98E',
       danger: '#FF6369',
       protein: '#F06B70',
@@ -63,13 +72,15 @@ export const PALETTES: Record<AccentName, { light: Palette; dark: Palette }> = {
     light: {
       ...shared,
       dark: false,
-      bg: '#F6EEF0',
+      bg: '#F9F4F5',
       card: '#FFFFFF',
       text: '#2A1218',
-      muted: '#7D6A70',
-      border: '#EEE1E5',
+      muted: '#86737A',
+      border: '#F1E6E9',
       primary: '#F2456A',
-      primarySoft: '#FFE4EA',
+      primarySoft: '#FFE9EE',
+      primaryLight: '#FF7B97',
+      highlight: 'rgba(255,255,255,0.9)',
       accent: '#1FAF7A',
       danger: '#D93036',
       protein: '#8D63F2',
@@ -77,13 +88,15 @@ export const PALETTES: Record<AccentName, { light: Palette; dark: Palette }> = {
     dark: {
       ...shared,
       dark: true,
-      bg: '#1A1013',
-      card: '#261A1E',
+      bg: '#140C0F',
+      card: '#22171B',
       text: '#FAF0F2',
       muted: '#A88E95',
       border: '#3A2A2F',
       primary: '#FF5C7D',
-      primarySoft: '#42202A',
+      primarySoft: '#3E1E28',
+      primaryLight: '#FF8AA3',
+      highlight: 'rgba(255,255,255,0.08)',
       accent: '#34C98E',
       danger: '#FF6369',
       protein: '#A586FF',
@@ -126,3 +139,37 @@ export const fonts = {
   bold: 'Figtree_700Bold',
   extrabold: 'Figtree_800ExtraBold',
 } as const;
+
+type Level = 1 | 2 | 3;
+
+const WEB_SHADOWS: Record<Level, [string, string]> = {
+  // [claro, oscuro] — varias capas: contacto nítido + sombra ambiental amplia
+  1: [
+    '0 1px 1px rgba(22,18,42,0.04), 0 2px 6px rgba(22,18,42,0.04), 0 10px 28px rgba(22,18,42,0.06)',
+    '0 1px 2px rgba(0,0,0,0.5), 0 10px 28px rgba(0,0,0,0.35)',
+  ],
+  2: [
+    '0 1px 2px rgba(22,18,42,0.06), 0 6px 14px rgba(22,18,42,0.06), 0 20px 44px rgba(22,18,42,0.10)',
+    '0 2px 4px rgba(0,0,0,0.5), 0 20px 44px rgba(0,0,0,0.5)',
+  ],
+  3: [
+    '0 2px 4px rgba(22,18,42,0.08), 0 12px 24px rgba(22,18,42,0.10), 0 32px 64px rgba(22,18,42,0.14)',
+    '0 2px 6px rgba(0,0,0,0.6), 0 32px 64px rgba(0,0,0,0.6)',
+  ],
+};
+
+/** Sombra en capas (profundidad) que funciona igual en web y en móvil. */
+export function depth(level: Level, colors: Palette, glow?: string): ViewStyle {
+  if (Platform.OS === 'web') {
+    const base = WEB_SHADOWS[level][colors.dark ? 1 : 0];
+    const extra = glow ? `, 0 ${4 + level * 4}px ${12 + level * 10}px ${glow}55` : '';
+    return { boxShadow: base + extra } as ViewStyle;
+  }
+  return {
+    shadowColor: glow ?? (colors.dark ? '#000000' : '#16122A'),
+    shadowOpacity: glow ? 0.35 : colors.dark ? 0.45 : [0, 0.07, 0.1, 0.14][level],
+    shadowRadius: [0, 14, 22, 32][level],
+    shadowOffset: { width: 0, height: [0, 6, 10, 16][level] },
+    elevation: [0, 3, 8, 14][level],
+  };
+}

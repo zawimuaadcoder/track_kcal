@@ -74,7 +74,9 @@ export async function getProductByBarcode(code: string): Promise<Food | null> {
   } catch (e) {
     if (Platform.OS === 'web') throw e;
     // En el móvil, si el proxy falla, probamos directamente con OFF
-    const res = await fetch(`${BASE}/api/v2/product/${encodeURIComponent(code)}.json?fields=${FIELDS}`, { headers: HEADERS });
+    const res = await fetch(`${BASE}/api/v2/product/${encodeURIComponent(code)}.json?fields=${FIELDS}`, {
+      headers: HEADERS,
+    });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Error ${res.status} al buscar el producto`);
     const json = await res.json();

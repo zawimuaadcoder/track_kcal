@@ -1,7 +1,9 @@
-import { ReactNode, useEffect, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { ComponentProps, ReactNode, useEffect, useId, useRef } from 'react';
 import {
   Animated,
   Easing,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -10,12 +12,39 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
-import { fonts, Palette, radius, spacing, useThemed } from '../lib/theme';
+import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { depth, fonts, Palette, radius, spacing, useThemed } from '../lib/theme';
 
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
   const { styles } = useThemed(makeStyles);
-  return <View style={[styles.card, style]}>{children}</View>;
+  return (
+    <View style={[styles.card, style]}>
+      <View pointerEvents="none" style={styles.cardHighlight} />
+      {children}
+    </View>
+  );
+}
+
+/** Degradado vertical a pantalla completa del contenedor (para botones y fondos). */
+export function VerticalGradient({ top, bottom, radius: r = 0 }: { top: string; bottom: string; radius?: number }) {
+  const id = useId().replace(/:/g, '');
+  return (
+    <Svg
+      width="100%"
+      height="100%"
+      style={[StyleSheet.absoluteFill, { borderRadius: r }]}
+      preserveAspectRatio="none"
+      viewBox="0 0 100 100"
+    >
+      <Defs>
+        <LinearGradient id={`v${id}`} x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={top} />
+          <Stop offset="1" stopColor={bottom} />
+        </LinearGradient>
+      </Defs>
+      <Rect width="100" height="100" fill={`url(#v${id})`} />
+    </Svg>
+  );
 }
 
 export function Button({
@@ -24,29 +53,94 @@ export function Button({
   variant = 'primary',
   disabled,
   style,
+  icon,
 }: {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'danger';
   disabled?: boolean;
   style?: ViewStyle;
+  icon?: ReactNode;
 }) {
   const { colors, styles } = useThemed(makeStyles);
-  const bg = variant === 'primary' ? colors.primary : variant === 'danger' ? colors.danger : colors.card;
+  const scale = useRef(new Animated.Value(1)).current;
+  const to = (v: number) =>
+    Animated.spring(scale, { toValue: v, friction: 6, tension: 220, useNativeDriver: Platform.OS !== 'web' }).start();
+  const filled = variant !== 'secondary';
+  const [top, bottom] = variant === 'danger' ? ['#FF7A7E', colors.danger] : [colors.primaryLight, colors.primary];
   const fg = variant === 'secondary' ? colors.primary : colors.onPrimary;
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [
-        styles.button,
-        { backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.75 : 1 },
-        variant === 'secondary' && { borderWidth: 1, borderColor: colors.border },
-        style,
+      onPressIn={() => to(0.97)}
+      onPressOut={() => to(1)}
+      style={[{ opacity: disabled ? 0.45 : 1 }, style && { alignSelf: (style as ViewStyle).alignSelf }]}
+    >
+      <Animated.View
+        style={[
+          styles.button,
+          filled
+            ? [{ backgroundColor: bottom }, depth(2, colors, disabled ? undefined : bottom)]
+            : [styles.buttonSecondary, depth(1, colors)],
+          style,
+          { transform: [{ scale }] },
+        ]}
+      >
+        {filled ? <VerticalGradient top={top} bottom={bottom} /> : null}
+        {filled ? <View pointerEvents="none" style={styles.buttonShine} /> : null}
+        <View style={styles.buttonContent}>
+          {icon}
+          <Text style={[styles.buttonText, { color: fg }]}>{title}</Text>
+        </View>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+/** Icono dentro de una insignia redonda con degradado y brillo, como en Bevel. */
+export function IconBadge({
+  name,
+  color,
+  size = 40,
+  soft = false,
+}: {
+  name: ComponentProps<typeof Ionicons>['name'];
+  color: string;
+  size?: number;
+  soft?: boolean;
+}) {
+  const { colors } = useThemed(makeStyles);
+  return (
+    <View
+      style={[
+        {
+          width: size,
+          height: size,
+          borderRadius: size * 0.34,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        },
+        soft ? { backgroundColor: `${color}1F` } : depth(1, colors, color),
       ]}
     >
-      <Text style={[styles.buttonText, { color: fg }]}>{title}</Text>
-    </Pressable>
+      {soft ? null : <VerticalGradient top={`${color}B3`} bottom={color} />}
+      {soft ? null : (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: size / 2,
+            backgroundColor: 'rgba(255,255,255,0.18)',
+          }}
+        />
+      )}
+      <Ionicons name={name} size={size * 0.5} color={soft ? color : '#FFFFFF'} />
+    </View>
   );
 }
 
@@ -149,11 +243,37 @@ const makeStyles = (colors: Palette) =>
       backgroundColor: colors.card,
       borderRadius: radius,
       padding: spacing,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      ...depth(1, colors),
     },
+    cardHighlight: {
+      position: 'absolute',
+      top: 0,
+      left: 18,
+      right: 18,
+      height: 1,
+      backgroundColor: colors.highlight,
+    },
+    buttonSecondary: {
+      backgroundColor: colors.card,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    buttonShine: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '50%',
+      backgroundColor: 'rgba(255,255,255,0.10)',
+    },
+    buttonContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     button: {
       paddingVertical: 16,
       paddingHorizontal: 22,
       borderRadius: 999,
+      overflow: 'hidden',
       alignItems: 'center',
     },
     buttonText: { fontSize: 16, fontFamily: fonts.semibold },

@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { GradientRing, SoftGradient, StatCard } from '../../components/bevel';
+import { GradientRing, Scenery, StatCard } from '../../components/bevel';
 import { Screen } from '../../components/Screen';
 import { Bar, Button, Card, NumberInput, parseNumber } from '../../components/ui';
 import { WeightChart } from '../../components/WeightChart';
 import { confirm } from '../../lib/dialog';
 import { dateKey, shiftDate, sumNutrients } from '../../lib/nutrition';
 import { useStore } from '../../lib/store';
-import { fonts, Palette, useThemed } from '../../lib/theme';
+import { depth, fonts, Palette, useThemed } from '../../lib/theme';
 
 const fmtKg = (n: number) => n.toFixed(1).replace('.', ',');
 
@@ -45,8 +45,12 @@ export default function Progress() {
 
   return (
     <Screen title="Progreso">
-      <View style={styles.hero}>
-        <SoftGradient from={colors.dark ? '#1E3A2E' : '#DDF7EA'} to={colors.bg} />
+      <View style={[styles.hero, depth(2, colors)]}>
+        <Scenery
+          sky={colors.dark ? ['#16261F', '#1D3329'] : ['#DDF5E9', '#F6FCF8']}
+          hills={colors.dark ? ['#2D6B52', '#245A45', '#1A4535'] : ['#A7E3C4', '#7ED3A8', '#4FBF8A']}
+          sun={colors.dark ? '#E8FFE9' : '#FFFFFF'}
+        />
         <GradientRing size={210} stroke={18} progress={progress} from="#7EE8B5" to={colors.accent} glossy>
           <Text style={styles.heroPct}>
             {Math.round(Math.min(progress, 1) * 100)}

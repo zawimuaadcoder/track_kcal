@@ -1,19 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GradientRing, InsightCard, SectionTitle, SoftGradient, StatusChip } from '../../components/bevel';
 import { AnimatedNumber, FadeIn, PressScale } from '../../components/motion';
 import { ProfileAvatar } from '../../components/ProfileGate';
 import { Screen } from '../../components/Screen';
 import { StreakCelebration } from '../../components/StreakCelebration';
-import { Bar, Card } from '../../components/ui';
+import { Bar, Card, IconBadge, VerticalGradient } from '../../components/ui';
 import { pickInsight } from '../../lib/insights';
 import { dateKey, entryNutrients, formatDateLabel, macroGoals, shiftDate, sumNutrients } from '../../lib/nutrition';
 import { useSession } from '../../lib/session';
 import { useStore } from '../../lib/store';
 import { computeStreak } from '../../lib/streak';
-import { fonts, Palette, useThemed } from '../../lib/theme';
+import { depth, fonts, Palette, useThemed } from '../../lib/theme';
 import { MEALS } from '../../lib/types';
 
 const GLASS_ML = 250;
@@ -21,6 +22,29 @@ const GLASS_ML = 250;
 /** 1240 → "1.240" (separador de miles español, también para 4 cifras) */
 const formatInt = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const formatLiters = (ml: number, digits: number) => (ml / 1000).toFixed(digits).replace('.', ',');
+
+const MEAL_COLORS = { desayuno: '#F5A524', comida: '#FF6B5B', cena: '#7C5CFF', snacks: '#1FAF7A' } as const;
+
+/** Dos manchas de color difuminadas dentro de la tarjeta principal. */
+function Aurora({ a, b }: { a: string; b: string }) {
+  const id = useId().replace(/:/g, '');
+  return (
+    <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} preserveAspectRatio="none" viewBox="0 0 100 100">
+      <Defs>
+        <RadialGradient id={`ha${id}`} cx="0.5" cy="0.5" r="0.5">
+          <Stop offset="0" stopColor={a} stopOpacity={0.28} />
+          <Stop offset="1" stopColor={a} stopOpacity={0} />
+        </RadialGradient>
+        <RadialGradient id={`hb${id}`} cx="0.5" cy="0.5" r="0.5">
+          <Stop offset="0" stopColor={b} stopOpacity={0.24} />
+          <Stop offset="1" stopColor={b} stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
+      <Circle cx="88" cy="8" r="55" fill={`url(#ha${id})`} />
+      <Circle cx="8" cy="96" r="50" fill={`url(#hb${id})`} />
+    </Svg>
+  );
+}
 
 const MEAL_ICONS = {
   desayuno: 'cafe-outline',
@@ -138,8 +162,9 @@ export default function Diary() {
       </View>
 
       <FadeIn delay={40}>
-        <View style={styles.heroCard}>
-          <SoftGradient from={colors.primarySoft} to={colors.card} />
+        <View style={[styles.heroCard, depth(2, colors)]}>
+          <Aurora a={colors.primary} b={colors.dark ? '#2E9CF2' : '#FF9EC4'} />
+          <View pointerEvents="none" style={styles.heroHighlight} />
           <View style={styles.eatenRow}>
             <Ionicons name="restaurant-outline" size={14} color={colors.muted} />
             <Text style={styles.eatenText}>
@@ -155,7 +180,8 @@ export default function Diary() {
           <View style={styles.heroBar}>
             <Bar progress={totals.kcal / profile.calorieGoal} color={remaining < 0 ? colors.danger : colors.primary} />
           </View>
-          <View style={styles.pill}>
+          <View style={[styles.pill, depth(1, colors, colors.primary)]}>
+            <VerticalGradient top={colors.primaryLight} bottom={colors.primary} />
             <Text style={styles.pillText}>Objetivo {formatInt(profile.calorieGoal)} kcal</Text>
           </View>
         </View>
@@ -195,9 +221,7 @@ export default function Diary() {
           <FadeIn key={meal.key} delay={180 + mealIndex * 60}>
             <Card>
               <View style={styles.mealHeader}>
-                <View style={styles.mealIcon}>
-                  <Ionicons name={MEAL_ICONS[meal.key]} size={20} color={colors.primary} />
-                </View>
+                <IconBadge name={MEAL_ICONS[meal.key]} color={MEAL_COLORS[meal.key]} size={44} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.mealTitle}>{meal.label}</Text>
                   <Text style={styles.mealKcal}>
@@ -208,10 +232,12 @@ export default function Diary() {
                 </View>
                 <PressScale
                   onPress={() => router.push({ pathname: '/add-food', params: { date, meal: meal.key } })}
-                  style={styles.addBtn}
+                  style={[styles.addBtn, depth(1, colors, colors.primary)]}
                   hitSlop={8}
                   accessibilityLabel={`Añadir a ${meal.label}`}
                 >
+                  <VerticalGradient top={colors.primaryLight} bottom={colors.primary} />
+                  <View pointerEvents="none" style={styles.addShine} />
                   <Ionicons name="add" size={26} color={colors.onPrimary} />
                 </PressScale>
               </View>
@@ -221,7 +247,7 @@ export default function Diary() {
                   style={({ pressed }) => [styles.entry, pressed && { opacity: 0.7 }]}
                   onPress={() => router.push({ pathname: '/food', params: { date, entryId: e.id } })}
                 >
-                  <View style={styles.thumb}>
+                  <View style={[styles.thumb, depth(1, colors)]}>
                     {e.food.imageUrl ? (
                       <Image source={{ uri: e.food.imageUrl }} style={styles.thumbImg} />
                     ) : (
@@ -249,9 +275,7 @@ export default function Diary() {
       <FadeIn delay={440}>
         <Card>
           <View style={styles.mealHeader}>
-            <View style={[styles.mealIcon, { backgroundColor: `${colors.water}22` }]}>
-              <Ionicons name="water" size={20} color={colors.water} />
-            </View>
+            <IconBadge name="water" color={colors.water} size={44} />
             <View style={{ flex: 1 }}>
               <Text style={styles.mealTitle}>Agua</Text>
               <Text style={styles.mealKcal}>
@@ -342,13 +366,22 @@ const makeStyles = (colors: Palette) =>
     chips: { flexDirection: 'row', gap: 10 },
     heroCard: {
       alignItems: 'center',
-      paddingTop: 18,
-      paddingBottom: 20,
-      borderRadius: 28,
+      paddingTop: 20,
+      paddingBottom: 22,
+      borderRadius: 30,
       overflow: 'hidden',
       backgroundColor: colors.card,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
+    },
+    heroHighlight: { position: 'absolute', top: 0, left: 30, right: 30, height: 1, backgroundColor: colors.highlight },
+    addShine: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '50%',
+      backgroundColor: 'rgba(255,255,255,0.14)',
     },
     eatenRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
     eatenText: { fontFamily: fonts.medium, fontSize: 14, color: colors.muted },
@@ -365,7 +398,9 @@ const makeStyles = (colors: Palette) =>
     heroBar: { width: 180, marginTop: 12 },
     pill: {
       marginTop: 14,
-      backgroundColor: colors.primary,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.25)',
       borderRadius: 999,
       paddingVertical: 8,
       paddingHorizontal: 16,
@@ -393,7 +428,7 @@ const makeStyles = (colors: Palette) =>
       width: 42,
       height: 42,
       borderRadius: 21,
-      backgroundColor: colors.primary,
+      overflow: 'hidden',
       alignItems: 'center',
       justifyContent: 'center',
     },

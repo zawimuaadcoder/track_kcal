@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../../components/Screen';
-import { GradientRing, InsightCard, SoftGradient, StatCard } from '../../components/bevel';
+import { GradientRing, InsightCard, Scenery, StatCard } from '../../components/bevel';
 import { Button, Card } from '../../components/ui';
 import { confirm } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
-import { fonts, Palette, useThemed } from '../../lib/theme';
+import { depth, fonts, Palette, useThemed } from '../../lib/theme';
 
 const PLANS = [
   { hours: 12, label: '12:12' },
@@ -92,8 +92,12 @@ export default function Fasting() {
 
   return (
     <Screen title="Ayuno">
-      <View style={styles.hero}>
-        <SoftGradient from={colors.dark ? '#1B2A4A' : '#D8EBFF'} to={colors.bg} />
+      <View style={[styles.hero, depth(2, colors)]}>
+        <Scenery
+          sky={colors.dark ? ['#13223F', '#1E3550'] : ['#CFE6FF', '#F2F8FF']}
+          hills={colors.dark ? ['#2B5A7A', '#1F4A5E', '#173A44'] : ['#8EC5E8', '#7FC7A8', '#5DB58C']}
+          sun={colors.dark ? '#FFE9A8' : '#FFFFFF'}
+        />
         <GradientRing
           size={250}
           stroke={20}
